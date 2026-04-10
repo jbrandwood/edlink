@@ -53,8 +53,8 @@ namespace edlink.ED64 {
 
         internal void Run(string path) {
 
-            if (path.ToLower().StartsWith("sd:")) {
-                RunSDC(path.Substring(3));
+            if (Link.IsDevPath(path)) {
+                RunSDC(Link.GetPath(path));
             } else {
                 RunUSB(path);
             }

@@ -7,31 +7,40 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace edlink {
-    internal class Cmd {
+    public class CmdLine {
 
         string[] cmd;
 
-        public Cmd(string[] args, int offset) {
+        public CmdLine(string[] args, int offset) {
 
-            int cmd_size = 0;
+            var cmd_args = new List<string>();
+
+            if (offset >= args.Length) {
+                throw new Exception("cmd line: out of args list");
+            }
+
+ 
+            if (args[offset].StartsWith(CliHandlerCmd.ARG_PREFIX)) {
+                throw new Exception("cmd line: invalid cmd format '" + args[offset] + "'");
+            }
 
             for (int i = offset; i < args.Length; i++) {
 
-                if (args[i].Trim().Equals("--")) {
+                string val = args[i];
+
+                if (val.Trim().Equals(CliHandlerCmd.ARG_NEWCMD)) {
                     break;
                 }
 
-                cmd_size++;
-            }
-
-            cmd = new string[cmd_size];
-            for (int i = 0; i < cmd_size; i++) {
-
-                cmd[i] = args[offset + i];
-                if (cmd[i].StartsWith("--") || i == 0) {
-                    cmd[i] = cmd[i].ToLower().Trim();
+                if (val.StartsWith(CliHandlerCmd.ARG_PREFIX) || i == offset) {
+                    //fixed format for arg and cmd names
+                    val = val.ToLower().Trim();
                 }
+
+                cmd_args.Add(val);
             }
+
+            cmd = cmd_args.ToArray();
         }
 
         public string Name {
@@ -67,18 +76,24 @@ namespace edlink {
             }
         }
 
-        public static Cmd[] Parse(string[] args) {
+        public static CmdLine[] Parse(string[] args) {
 
             args = ParseSpecial(args);
 
-            var cmd_list = new List<Cmd>();
+            var cmd_list = new List<CmdLine>();
 
             if (args.Length == 1) {
             }
 
             for (int i = 0; i < args.Length;) {
 
-                Cmd c = new Cmd(args, i);
+                if (args[i].Trim().Equals(CliHandlerCmd.ARG_NEWCMD)) {
+                    i++;
+                    continue;
+                }
+
+                CmdLine c = new CmdLine(args, i);
+
                 if (c.Size == 0) {
                     i++;
                     continue;
@@ -104,7 +119,7 @@ namespace edlink {
                 return args;
             }
 
-            return new string[] { "run", "--file", args[0] };
+            return new string[] { "run", CliHandlerCmd.ARG_FILE, args[0] };
         }
         int Size {
             get { return cmd.Length; }
@@ -112,8 +127,8 @@ namespace edlink {
 
         int SeekVal(int arg_idx) {
 
-            if (arg_idx + 1 >= cmd.Length || cmd[arg_idx + 1].StartsWith("--")) {
-                throw new Exception("argument " + cmd[arg_idx] + " requires a value");
+            if (arg_idx + 1 >= cmd.Length || cmd[arg_idx + 1].StartsWith(CliHandlerCmd.ARG_PREFIX)) {
+                throw new CmdException("argument " + cmd[arg_idx] + " requires a value");
             }
 
             return arg_idx + 1;
@@ -121,8 +136,8 @@ namespace edlink {
 
         int SeekArg(string arg) {
 
-            if (!arg.StartsWith("--")) {
-                throw new Exception("invalid argument name " + arg);
+            if (!arg.StartsWith(CliHandlerCmd.ARG_PREFIX)) {
+                throw new CmdException("invalid argument name " + arg);
             }
 
             arg = arg.ToLower();
@@ -133,7 +148,7 @@ namespace edlink {
                 }
             }
 
-            throw new Exception("missing required option " + arg);
+            throw new CmdException("missing required option " + arg);
         }
     }
 }

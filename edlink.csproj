@@ -43,12 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cmd.cs" />
-    <Compile Include="CmdHandler.cs" />
-    <Compile Include="DeviceCmd.cs" />
-    <Compile Include="DeviceIOFacotoy.cs" />
-    <Compile Include="ED64\MenuCmd.cs" />
+    <Compile Include="Cli.cs" />
+    <Compile Include="CmdException.cs" />
+    <Compile Include="CmdLine.cs" />
+    <Compile Include="CliHandler.cs" />
+    <Compile Include="DeviceCmdBase.cs" />
+    <Compile Include="ED64\DeviceCmd.cs" />
     <Compile Include="IDeviceIO.cs" />
+    <Compile Include="CliHandlerCmd.cs" />
+    <Compile Include="DeviceCmdFacotoy.cs" />
+    <Compile Include="ED64\MenuCmd.cs" />
+    <Compile Include="IDeviceCmd.cs" />
     <Compile Include="ED64\DeviceIO.cs" />
     <Compile Include="Link.cs" />
     <Compile Include="Program.cs" />

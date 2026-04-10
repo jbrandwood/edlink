@@ -23,6 +23,8 @@ namespace edlink {
         bool cfg_locked = false;
         string target_port = null;
 
+        bool cold_start = true;
+
         string[] port_blk = new string[0];
 
         public Link() {
@@ -64,11 +66,20 @@ namespace edlink {
         public void Open() {
 
             try {
+
                 TryOpen();
-            } catch (Exception) {
-                Thread.Sleep(200);
-                TryOpen();
+
+            } catch (Exception x) {
+
+                if (cold_start) {
+                    Thread.Sleep(100);
+                    TryOpen();
+                } else {
+                    throw x;
+                }
             }
+
+            cold_start = false;
         }
         public void TryOpen() {
 
@@ -79,7 +90,7 @@ namespace edlink {
             if (target_port != null) {
                 ports = new string[] { target_port };
             } else {
-                ports = SerialPort.GetPortNames();
+                ports = getPorts();
             }
 
             for (int i = 0; i < ports.Length; i++) {
@@ -96,7 +107,7 @@ namespace edlink {
         }
 
         public void Close() {
-
+            
             try {
                 port.Close();
             } catch (Exception) { }
@@ -204,6 +215,11 @@ namespace edlink {
             return num32(buff);
         }
 
+        public void txString(string str) {
+            tx16(str.Length);
+            txData(str);
+        }
+
         public void txCMD(byte cmd_code) {
             byte[] cmd = new byte[4];
             cmd[0] = (byte)('+');
@@ -231,6 +247,23 @@ namespace edlink {
             int resp = port.ReadByte();
             port.ReadTimeout = old_tout;
             return resp;
+        }
+
+        public static bool IsDevPath(string path) {
+
+            if (path.ToLower().StartsWith("sd:")) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        public static string GetPath(string path) {
+
+            if (IsDevPath(path)) {
+                return path.Substring(3);
+            } else {
+                return path;
+            }
         }
         //************************************************************************************************
         int num(byte[] val, int bytes) {
@@ -328,7 +361,8 @@ namespace edlink {
                 return;
             }
 
-            string[] ports = SerialPort.GetPortNames();
+            string[] ports = getPorts();
+
             port_blk = new string[ports.Length];
 
             for (int i = 0; i < ports.Length; i++) {
@@ -338,6 +372,14 @@ namespace edlink {
                     port_blk[i] += "-LINKED";
                 }
             }
+        }
+
+        string [] getPorts() {
+
+            string[] ports = SerialPort.GetPortNames();
+            string[] unique = ports.Distinct().ToArray();
+
+            return unique;
         }
 
         void getID() {

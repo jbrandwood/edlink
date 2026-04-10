@@ -16,17 +16,29 @@ namespace edlink {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("edlink v" + Assembly.GetEntryAssembly().GetName().Version);
 
-            //args = new string[] { "link", "--dev-id", "0x27"};
-            //args = new string[] { "memprint", "--addr", "0xFF00000" };
-            //args = new string[] { "link", "--port", "COM22", "--dev-id", "0x27", "--", "memprint", "--addr", "0xFF00000" };
 
+            //args = new string[] { "link", "--dcmd-id", "0x27"};
+            //args = new string[] { "memprint", "--addr", "0xFF00000" };
+            //args = new string[] { "link", "--port", "COM22", "--dcmd-id", "0x27", "--", "memprint", "--addr", "0xFF00000" };
+
+            //args = new string[] { "linkz", "--dcmd-id", "0x27" };
+            //args = new string[] {"setmode", "--mode", "service"};
+
+            //args = new string[] { "-sermode", "-flawr", "xxx.bin" };
 
             long time = DateTime.Now.Ticks;
 
-            CmdHandler cmd = null;
+            CliHandler cmd = null;
+
+            /*
+            cmd = new CliHandler(args);
+            cmd.Start();
+            cmd.Stop();
+            cmd = null;
+            return;*/
 
             try {
-                cmd = new CmdHandler(args);
+                cmd = new CliHandler(args);
                 cmd.Start();
                 cmd = null;
             } catch (Exception x) {
