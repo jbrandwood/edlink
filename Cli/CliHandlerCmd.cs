@@ -3,88 +3,94 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Edlink.Device;
 
-namespace edlink {
+namespace Edlink {
     internal class CliHandlerCmd {
 
-        public const string ARG_PREFIX = "--";
-        public const string ARG_NEWCMD = "--";
-        public const string ARG_FILE = "--file";
-        const string ARG_ADDR = "--addr";
-        const string ARG_LEN = "--len";
-        const string ARG_OFFSET = "--offset";
-        const string ARG_FPGA = "--fpga";
-        const string ARG_SRC = "--src";
-        const string ARG_DST = "--dst";
-        const string ARG_MODE = "--mode";
-        
-
-        protected IDeviceCmd dcmd;
+        protected DeviceCmd dcmd;
 
 
         protected void SetMode(CmdLine cmd) {
 
-            string mode = cmd.getStr(ARG_MODE);
+            string mode = cmd.getStr(Cli.ArgMode);
             CmdStart(cmd, "set mode: " + mode + "...");
             dcmd.SetMode(mode);
             CmdEnd("ok");
         }
 
-        protected void MemPrint(CmdLine cmd) {
+        protected void LinkConfig(CmdLine cmd, Link link) {//move to Cmd base
 
-            int addr = cmd.getInt(ARG_ADDR);
-            int len = 256;
 
-            if (cmd.HasArg(ARG_LEN)) {
-                len = cmd.getInt(ARG_LEN);
+            if (cmd.HasArg(Cli.ArgPort)) {
+                link.PortName = cmd.getStr(Cli.ArgPort);
             }
 
-            byte[] buff = new byte[len];
-            dcmd.MemRD(addr, buff, 0, len);
+            if (cmd.HasArg(Cli.ArgDevId)) {
+                link.DeviceID = (byte)cmd.getInt(Cli.ArgDevId);
+            }
 
-            for (int i = 0; i < buff.Length; i += 16) {
-                Console.WriteLine(BitConverter.ToString(buff, i, Math.Min(len, 16)));
+            if (cmd.HasArg(Cli.ArgProtId)) {
+                link.ProtocolID = (byte)cmd.getInt(Cli.ArgProtId);
             }
         }
+
+
 
         protected void MemRD(CmdLine cmd) {
 
             CmdStart(cmd, "memory read...");
 
-            string path = cmd.getStr(ARG_FILE);
-            int addr = cmd.getInt(ARG_ADDR);
-            int len = cmd.getInt(ARG_LEN);
+            bool print = cmd.HasArg(Cli.ArgOut);
+            int addr = cmd.getInt(Cli.ArgAddr);
+            int len = cmd.getInt(Cli.ArgLen);
+            string path;
+
+            if (cmd.HasArg(Cli.ArgFile) || !print) {
+                path = cmd.getStr(Cli.ArgFile);
+            } else {
+                path = null;
+            }
 
             byte[] buff = new byte[len];
             dcmd.MemRD(addr, buff, 0, len);
 
-            File.WriteAllBytes(path, buff);
+            if (path != null) {
+                File.WriteAllBytes(path, buff);
+            }
 
             CmdEnd("ok");
+
+            if (print) {
+                for (int i = 0; i < buff.Length; i += 16) {
+                    Console.WriteLine(BitConverter.ToString(buff, i, Math.Min(len, 16)));
+                }
+            }
         }
 
         protected void MemWR(CmdLine cmd) {
 
             CmdStart(cmd, "memory write...");
 
-            string path = cmd.getStr(ARG_FILE);
-            int addr = cmd.getInt(ARG_ADDR);
+            string path = cmd.getStr(Cli.ArgFile);
+            int addr = cmd.getInt(Cli.ArgAddr);
             int len;
             int offset = 0;
 
             byte[] buff = File.ReadAllBytes(path);
 
-            if (cmd.HasArg(ARG_LEN)) {
-                len = cmd.getInt(ARG_LEN);
+            if (cmd.HasArg(Cli.ArgLen)) {
+                len = cmd.getInt(Cli.ArgLen);
             } else {
                 len = buff.Length;
             }
 
-            if (cmd.HasArg(ARG_OFFSET)) {
-                offset = cmd.getInt(ARG_OFFSET);
+            if (cmd.HasArg(Cli.ArgOffset)) {
+                offset = cmd.getInt(Cli.ArgOffset);
             }
 
             dcmd.MemWR(addr, buff, offset, len);
@@ -97,9 +103,9 @@ namespace edlink {
 
             CmdStart(cmd, "flash read read...");
 
-            string path = cmd.getStr(ARG_FILE);
-            int addr = cmd.getInt(ARG_ADDR);
-            int len = cmd.getInt(ARG_LEN);
+            string path = cmd.getStr(Cli.ArgFile);
+            int addr = cmd.getInt(Cli.ArgAddr);
+            int len = cmd.getInt(Cli.ArgLen);
 
             byte[] buff = new byte[len];
             dcmd.FlaRD(addr, buff, 0, len);
@@ -113,21 +119,21 @@ namespace edlink {
 
             CmdStart(cmd, "flash write.");
 
-            string path = cmd.getStr(ARG_FILE);
-            int addr = cmd.getInt(ARG_ADDR);
+            string path = cmd.getStr(Cli.ArgFile);
+            int addr = cmd.getInt(Cli.ArgAddr);
             int len;
             int offset = 0;
 
             byte[] buff = File.ReadAllBytes(path);
 
-            if (cmd.HasArg(ARG_LEN)) {
-                len = cmd.getInt(ARG_LEN);
+            if (cmd.HasArg(Cli.ArgLen)) {
+                len = cmd.getInt(Cli.ArgLen);
             } else {
                 len = buff.Length;
             }
 
-            if (cmd.HasArg(ARG_OFFSET)) {
-                offset = cmd.getInt(ARG_OFFSET);
+            if (cmd.HasArg(Cli.ArgOffset)) {
+                offset = cmd.getInt(Cli.ArgOffset);
             }
 
             while (len > 0) {
@@ -155,10 +161,10 @@ namespace edlink {
 
             CmdStart(cmd, "run application...");
 
-            string rom_path = cmd.getStr(ARG_FILE);
+            string rom_path = cmd.getStr(Cli.ArgFile);
             string fpga_path = null;
 
-            if (cmd.HasArg(ARG_FPGA)) {
+            if (cmd.HasArg(Cli.ArgFpga)) {
                 fpga_path = cmd.getStr(fpga_path);
             }
 
@@ -170,15 +176,15 @@ namespace edlink {
         protected void FpgaInit(CmdLine cmd) {
 
             CmdStart(cmd, "fpga init...");
-            string path = cmd.getStr(ARG_FILE);
+            string path = cmd.getStr(Cli.ArgFile);
             dcmd.FpgaInit(path);
             CmdEnd("ok");
         }
 
         protected void Copy(CmdLine cmd) {
 
-            string src = cmd.getStr(ARG_SRC);
-            string dst = cmd.getStr(ARG_DST);
+            string src = cmd.getStr(Cli.ArgSrc);
+            string dst = cmd.getStr(Cli.ArgDst);
 
             if (!Link.IsDevPath(src) && File.GetAttributes(src).HasFlag(FileAttributes.Directory)) {
                 CopyDir(cmd, src, dst);
@@ -187,7 +193,43 @@ namespace edlink {
             }
         }
 
-         void CopyFile(CmdLine cmd, string src, string dst) {
+        protected void RtcSet(CmdLine cmd) {
+            CmdStart(cmd, "RTC set...");
+            dcmd.RtcSet();
+            CmdEnd("ok");
+        }
+
+        protected void McuUpd(CmdLine cmd) {
+
+            bool arg_ok = false;
+
+            string[] mode = {
+                Cli.ArgBoot,
+                Cli.ArgApp
+            };
+
+            for (int i = 0; i < mode.Length; i++) {
+
+                if (!cmd.HasArg(mode[i])) {
+                    continue;
+                }
+                arg_ok = true;
+
+                CmdStart(cmd, "MCU upd " + mode[i].Replace(Cli.ArgPrefix, "") + "...");
+                string path = cmd.getStr(mode[i]);
+                dcmd.McuUpd(path, mode[i]);
+                CmdEnd("ok");
+            }
+
+
+            if (!arg_ok) {
+                //force exception message
+                cmd.getStr(Cli.ArgBoot + " or " + Cli.ArgApp);
+            }
+
+        }
+        //************************************************************************************************ 
+        void CopyFile(CmdLine cmd, string src, string dst) {
 
             CmdStart(cmd, src + " --> " + dst);
             dcmd.CopyFile(src, dst);

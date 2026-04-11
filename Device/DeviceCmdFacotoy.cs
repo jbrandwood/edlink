@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace edlink {
+namespace Edlink.Device {
     internal class DeviceCmdFacotoy {
 
-        public static IDeviceCmd Create(Link link) {
+        public static DeviceCmd Create(Link link) {
 
             switch (link.ProtocolID) {
 

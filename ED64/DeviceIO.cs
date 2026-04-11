@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Edlink.Device;
 
-namespace edlink.ED64 {
+namespace Edlink.ED64 {
 
     internal class DeviceIO : IDeviceIO {
 
@@ -46,6 +47,10 @@ namespace edlink.ED64 {
         const byte CMD_EPO = 0x81;
         const byte EPO_SCMD_XFER = 0x10;
         const byte EPO_SCMD_WRE = 0x11;
+
+        const byte CMD_RTC = 0x83;
+        const byte RTC_SCMD_GET = 0x10;
+        const byte RTC_SCMD_SET = 0x11;
 
         const byte CMD_SYS = 0x84;
         const byte SYS_SCMD_FPG_INIT = 0x12;
@@ -173,25 +178,6 @@ namespace edlink.ED64 {
             link.txDataACK(data, 0, data.Length);
             checkStatus();
         }
-        //************************************************************************************************ internal
-        internal void fifoWR(string str) {
-
-            byte[] bytes = Encoding.ASCII.GetBytes(str);
-            fifoWR(bytes, 0, bytes.Length);
-        }
-
-        internal void fifoWR(byte[] data, int offset, int len) {
-
-            MemWR(ADDR_FCI_FIFO, data, offset, len);
-        }
-
-        internal void fifoTxString(string str) {
-
-            byte[] bytes = Encoding.ASCII.GetBytes(str);
-            byte[] len = link.num16(bytes.Length);
-            fifoWR(len, 0, 2);
-            fifoWR(bytes, 0, bytes.Length);
-        }
 
         public void fileOpen(string path, int mode) {
 
@@ -224,6 +210,42 @@ namespace edlink.ED64 {
         public void fileWrite(byte[] buff, int offset, int len) {
 
             epoWR(EPO_FS, 0, buff, offset, len);
+        }
+
+        public void rtcSet(DateTime dt) {
+
+            RtcTime rtc = new RtcTime(dt);
+            byte[] vals = rtc.getVals();
+            link.txCMD(CMD_RTC, RTC_SCMD_SET);
+            link.txData(vals, 0, 8);
+        }
+
+        public void mcuAppLoad(byte[] data) {
+
+            link.txCMD(CMD_BOOT, BOOT_SCMD_LOAD_APP);
+            txApp(data);
+
+            bootWait(2);
+            checkStatus();
+        }
+        //************************************************************************************************ internal
+        internal void fifoWR(string str) {
+
+            byte[] bytes = Encoding.ASCII.GetBytes(str);
+            fifoWR(bytes, 0, bytes.Length);
+        }
+
+        internal void fifoWR(byte[] data, int offset, int len) {
+
+            MemWR(ADDR_FCI_FIFO, data, offset, len);
+        }
+
+        internal void fifoTxString(string str) {
+
+            byte[] bytes = Encoding.ASCII.GetBytes(str);
+            byte[] len = link.num16(bytes.Length);
+            fifoWR(len, 0, 2);
+            fifoWR(bytes, 0, bytes.Length);
         }
         //************************************************************************************************ private
         byte[] getID() {
@@ -343,6 +365,13 @@ namespace edlink.ED64 {
                     throw new Exception("boot timeout");
                 }
             }
+        }
+
+        void txApp(byte[] data) {
+
+            link.tx32(data.Length);
+            link.txDataACK(data, 0, 512);
+            link.txDataACK(data, 512, data.Length - 512);
         }
 
     }

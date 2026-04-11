@@ -1,4 +1,4 @@
-﻿using edlink.ED64;
+﻿using Edlink.ED64;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,8 +7,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace edlink {
-    internal class DeviceCmdBase : IDeviceCmd {
+namespace Edlink.Device {
+    internal class DeviceCmd {
 
         protected IDeviceIO dev;
 
@@ -24,10 +24,10 @@ namespace edlink {
         public virtual void SetMode(string mode) {
 
             switch (mode) {
-                case "service":
+                case Cli.ModeService:
                     dev.enterServiceMode();
                     break;
-                case "app":
+                case Cli.ModeApp:
                     dev.exitServiceMode();
                     break;
                 default:
@@ -56,9 +56,8 @@ namespace edlink {
         }
 
         public virtual void FpgaInit(string path) {
-
-            byte[] fpga = File.ReadAllBytes(path);
-            dev.fpgInit(fpga);
+            byte[] buff = File.ReadAllBytes(path);
+            dev.fpgInit(buff);
         }
 
         public virtual void CopyFile(string src, string dst) {
@@ -84,11 +83,20 @@ namespace edlink {
             }
         }
 
+        public virtual void RtcSet() {
+            dev.rtcSet(DateTime.Now);
+        }
+
         public virtual void Reset() {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
         public virtual void Run(string rom_path, string fpga_path) {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
+        public virtual void McuUpd(string path, string mode) {
+
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 

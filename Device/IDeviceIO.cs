@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace edlink {
+namespace Edlink.Device {
     internal interface IDeviceIO {
 
         Link Link { get; }
@@ -20,5 +20,6 @@ namespace edlink {
         UInt64 fileAvailable();
         void fileRead(byte[] buff, int offset, int len);
         void fileWrite(byte[] buff, int offset, int len);
+        void rtcSet(DateTime dt);
     }
 }

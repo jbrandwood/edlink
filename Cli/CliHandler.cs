@@ -5,11 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using Edlink.Device;
 
-namespace edlink {
+
+namespace Edlink {
     internal class CliHandler : CliHandlerCmd {
 
-
+        
         Link link;
         CmdLine[] cmd_list;
 
@@ -56,8 +58,8 @@ namespace edlink {
 
             for (int i = 0; i < cmd_list.Length; i++) {
 
-                if (cmd_list[i].Name.Equals(".link")) {
-                    LinkConfig(cmd_list[i]);
+                if (cmd_list[i].Name.Equals(Cli.CmdLink)) {
+                    base.LinkConfig(cmd_list[i], link);
                     continue;
                 }
             }
@@ -70,34 +72,15 @@ namespace edlink {
                     continue;
                 }
 
-                if (cmd_list[i].Name.Equals("setmode")) {
+                if (cmd_list[i].Name.Equals(Cli.CmdSetMode)) {
                     set_def_mode = false;
                 }
                 break;
             }
 
             if (set_def_mode && cmd_list.Length > 0) {
-                string[] mode_cmd = new string[] { "setmode", "--mode", "app" };
-                cmd_list = cmd_list.Concat(CmdLine.Parse(mode_cmd)).ToArray();
-            }
-        }
-
-        void LinkConfig(CmdLine cmd) {//move to Cmd base
-
-            string arg_port = "--port";
-            string arg_dev_id = "--dev-id";
-            string arg_prot_id = "--protocol-id";
-
-            if (cmd.HasArg(arg_port)) {
-                link.PortName = cmd.getStr(arg_port);
-            }
-
-            if (cmd.HasArg(arg_dev_id)) {
-                link.DeviceID = (byte)cmd.getInt(arg_dev_id);
-            }
-
-            if (cmd.HasArg(arg_prot_id)) {
-                link.ProtocolID = (byte)cmd.getInt(arg_prot_id);
+                string[] mode_cmd = new string[] { Cli.CmdSetMode, Cli.ArgMode, Cli.ModeApp };
+                cmd_list = CmdLine.Parse(mode_cmd).Concat(cmd_list).ToArray();
             }
         }
 
@@ -128,44 +111,48 @@ namespace edlink {
 
             switch (cmd.Name) {
 
-                case "setmode":
+                case Cli.CmdSetMode:
                     base.SetMode(cmd);
                     break;
 
-                case "memprint":
-                    base.MemPrint(cmd);
-                    break;
-
-                case "memrd":
+                case Cli.CmdMemRd:
                     base.MemRD(cmd);
                     break;
 
-                case "memwr":
+                case Cli.CmdMemWr:
                     base.MemWR(cmd);
                     break;
 
-                case "flard":
+                case Cli.CmdFlaRd:
                     base.FlaRD(cmd);
                     break;
 
-                case "flawr":
+                case Cli.CmdFlaWr:
                     base.FlaWR(cmd);
                     break;
 
-                case "reset":
+                case Cli.CmdReset:
                     base.Reset(cmd);
                     break;
 
-                case "run":
+                case Cli.CmdRun:
                     base.Run(cmd);
                     break;
 
-                case "fpga":
+                case Cli.CmdFpga:
                     base.FpgaInit(cmd);
                     break;
 
-                case "cp":
+                case Cli.CmdCp:
                     base.Copy(cmd);
+                    break;
+
+                case Cli.CmdRtcSet:
+                    base.RtcSet(cmd);
+                    break;
+
+                case Cli.CmdMcuUpd:
+                    base.McuUpd(cmd);
                     break;
 
                 default:

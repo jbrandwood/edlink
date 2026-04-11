@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
-namespace edlink {
+namespace Edlink.Device {
     internal class Link {
 
         const byte STATUS_KEY = 0x5A;
@@ -387,8 +387,14 @@ namespace edlink {
             byte protocol_id = this.protocol_id;
             byte device_id = this.device_id;
 
-            txCMD(CMD_STATUS2);
-            txCMD(CMD_STATUS);
+            bool legacy_mode = protocol_id == 0x05 || protocol_id == 0x06;//n8 or mega
+
+            if (protocol_id == 0 || legacy_mode) {
+                txCMD(CMD_STATUS2);
+            }
+            if (protocol_id == 0 || !legacy_mode) {
+                txCMD(CMD_STATUS);
+            }
 
             byte[] id = rxData(4);
             Thread.Sleep(5);

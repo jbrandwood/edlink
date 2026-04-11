@@ -6,7 +6,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{6FBE5DBD-F9B6-497A-84A1-8A7A47CD6DC0}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>edlink</RootNamespace>
+    <RootNamespace>Edlink</RootNamespace>
     <AssemblyName>edlink</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -43,19 +43,19 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cli.cs" />
-    <Compile Include="CmdException.cs" />
-    <Compile Include="CmdLine.cs" />
-    <Compile Include="CliHandler.cs" />
-    <Compile Include="DeviceCmdBase.cs" />
+    <Compile Include="Cli\Cli.cs" />
+    <Compile Include="Cli\CmdException.cs" />
+    <Compile Include="Cli\CmdLine.cs" />
+    <Compile Include="Cli\CliHandler.cs" />
+    <Compile Include="Device\DeviceCmd.cs" />
+    <Compile Include="Device\RtcTime.cs" />
     <Compile Include="ED64\DeviceCmd.cs" />
-    <Compile Include="IDeviceIO.cs" />
-    <Compile Include="CliHandlerCmd.cs" />
-    <Compile Include="DeviceCmdFacotoy.cs" />
+    <Compile Include="Device\IDeviceIO.cs" />
+    <Compile Include="Cli\CliHandlerCmd.cs" />
+    <Compile Include="Device\DeviceCmdFacotoy.cs" />
     <Compile Include="ED64\MenuCmd.cs" />
-    <Compile Include="IDeviceCmd.cs" />
     <Compile Include="ED64\DeviceIO.cs" />
-    <Compile Include="Link.cs" />
+    <Compile Include="Device\Link.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

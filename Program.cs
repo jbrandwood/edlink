@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace edlink {
+namespace Edlink {
     internal class Program {
 
 
@@ -16,7 +16,6 @@ namespace edlink {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("edlink v" + Assembly.GetEntryAssembly().GetName().Version);
 
-
             //args = new string[] { "link", "--dcmd-id", "0x27"};
             //args = new string[] { "memprint", "--addr", "0xFF00000" };
             //args = new string[] { "link", "--port", "COM22", "--dcmd-id", "0x27", "--", "memprint", "--addr", "0xFF00000" };
@@ -24,7 +23,7 @@ namespace edlink {
             //args = new string[] { "linkz", "--dcmd-id", "0x27" };
             //args = new string[] {"setmode", "--mode", "service"};
 
-            //args = new string[] { "-sermode", "-flawr", "xxx.bin" };
+            //args = new string[] { "mcuupd", "--boot", "xxx.bin",  "--app"};
 
             long time = DateTime.Now.Ticks;
 

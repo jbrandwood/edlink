@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace edlink {
+namespace Edlink {
     public class CmdLine {
 
         string[] cmd;
@@ -20,7 +20,7 @@ namespace edlink {
             }
 
  
-            if (args[offset].StartsWith(CliHandlerCmd.ARG_PREFIX)) {
+            if (args[offset].StartsWith(Cli.ArgPrefix)) {
                 throw new Exception("cmd line: invalid cmd format '" + args[offset] + "'");
             }
 
@@ -28,11 +28,11 @@ namespace edlink {
 
                 string val = args[i];
 
-                if (val.Trim().Equals(CliHandlerCmd.ARG_NEWCMD)) {
+                if (val.Trim().Equals(Cli.NewCmd)) {
                     break;
                 }
 
-                if (val.StartsWith(CliHandlerCmd.ARG_PREFIX) || i == offset) {
+                if (val.StartsWith(Cli.ArgPrefix) || i == offset) {
                     //fixed format for arg and cmd names
                     val = val.ToLower().Trim();
                 }
@@ -87,7 +87,7 @@ namespace edlink {
 
             for (int i = 0; i < args.Length;) {
 
-                if (args[i].Trim().Equals(CliHandlerCmd.ARG_NEWCMD)) {
+                if (args[i].Trim().Equals(Cli.NewCmd)) {
                     i++;
                     continue;
                 }
@@ -119,7 +119,8 @@ namespace edlink {
                 return args;
             }
 
-            return new string[] { "run", CliHandlerCmd.ARG_FILE, args[0] };
+            //drag and exec
+            return new string[] { Cli.CmdRun, Cli.ArgFile, args[0] };
         }
         int Size {
             get { return cmd.Length; }
@@ -127,7 +128,7 @@ namespace edlink {
 
         int SeekVal(int arg_idx) {
 
-            if (arg_idx + 1 >= cmd.Length || cmd[arg_idx + 1].StartsWith(CliHandlerCmd.ARG_PREFIX)) {
+            if (arg_idx + 1 >= cmd.Length || cmd[arg_idx + 1].StartsWith(Cli.ArgPrefix)) {
                 throw new CmdException("argument " + cmd[arg_idx] + " requires a value");
             }
 
@@ -136,7 +137,7 @@ namespace edlink {
 
         int SeekArg(string arg) {
 
-            if (!arg.StartsWith(CliHandlerCmd.ARG_PREFIX)) {
+            if (!arg.StartsWith(Cli.ArgPrefix)) {
                 throw new CmdException("invalid argument name " + arg);
             }
 

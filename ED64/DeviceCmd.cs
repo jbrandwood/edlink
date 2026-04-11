@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Edlink.Device;
 
-namespace edlink.ED64 {
+namespace Edlink.ED64 {
 
-    internal class DeviceCmd : DeviceCmdBase {
+    internal class DeviceCmd : Device.DeviceCmd {
 
         new DeviceIO dev;
         MenuCmd mcmd;
@@ -42,6 +43,18 @@ namespace edlink.ED64 {
 
             mcmd.Test();
             mcmd.Run(rom_path);
+        }
+
+        public override void McuUpd(string path, string mode) {
+
+            if (mode.Equals(Cli.ArgApp)) {
+                byte[] buff = File.ReadAllBytes(path);
+                //dev.enterServiceMode();??
+                dev.mcuAppLoad(buff);
+                return;
+            }
+
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
         public override void SpecialCmd(CmdLine cmd) {
