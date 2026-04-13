@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,12 +23,12 @@ namespace Edlink {
         public const string ArgPort = "--port";
         public const string ArgDevId = "--dev-id";
         public const string ArgProtId = "--protocol-id";
-        public const string ArgBoot = "--boot";
-        public const string ArgApp = "--app";
+        public const string ArgScmd = "--scmd";
+        public const string ArgVal = "--val";
 
         public const string CmdLink = ".link";
         public const string CmdRun = "run";
-        public const string CmdSetMode = "setmode";
+        public const string CmdMcuMode = "mcumode";
         public const string CmdMemRd = "memrd";
         public const string CmdMemWr = "memwr";
         public const string CmdFlaRd = "flard";
@@ -36,9 +37,16 @@ namespace Edlink {
         public const string CmdFpga = "fpga";
         public const string CmdCp = "cp";
         public const string CmdRtcSet = "rtcset";
-        public const string CmdMcuUpd = "mcuupd";
+        public const string CmdRtcCal = "rtccal";//
+        public const string CmdMcuBoot = "mcuboot";
+        public const string CmdMcuApp = "mcuapp";
+        public const string CmdUsbSpd = "usbspd";
+        public const string CmdScreen = "screen";//
+        public const string CmdDiag = "diag";//
+        public const string CmdNetGame = "netgate";//
+        public const string CmdUsbPrint = "usbprint";//
 
-
+        //ArgMode
         public const string ModeApp = "app";
         public const string ModeService = "service";
 

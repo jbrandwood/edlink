@@ -45,21 +45,20 @@ namespace Edlink.ED64 {
             mcmd.Run(rom_path);
         }
 
-        public override void McuUpd(string path, string mode) {
+        public override void McuApp(string path) {
 
-            if (mode.Equals(Cli.ArgApp)) {
-                byte[] buff = File.ReadAllBytes(path);
-                //dev.enterServiceMode();??
-                dev.mcuAppLoad(buff);
-                return;
-            }
-
-            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+            byte[] buff = File.ReadAllBytes(path);
+            dev.enterServiceMode();
+            dev.McuAppLoad(buff);
         }
 
-        public override void SpecialCmd(CmdLine cmd) {
+        public override void McuBoot(string path) {
 
-            throw new CmdException(CmdExceptionType.UnknownCmd);
+            byte[] buff = File.ReadAllBytes(path);
+            dev.exitServiceMode();
+            dev.McuBootInstall(buff);
         }
+
+      
     }
 }

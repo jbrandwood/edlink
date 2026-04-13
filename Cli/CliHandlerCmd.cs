@@ -15,11 +15,11 @@ namespace Edlink {
         protected DeviceCmd dcmd;
 
 
-        protected void SetMode(CmdLine cmd) {
+        protected void McuMode(CmdLine cmd) {
 
             string mode = cmd.getStr(Cli.ArgMode);
             CmdStart(cmd, "set mode: " + mode + "...");
-            dcmd.SetMode(mode);
+            dcmd.McuMode(mode);
             CmdEnd("ok");
         }
 
@@ -194,39 +194,81 @@ namespace Edlink {
         }
 
         protected void RtcSet(CmdLine cmd) {
-            CmdStart(cmd, "RTC set...");
+
+            CmdStart(cmd, "rtc set...");
             dcmd.RtcSet();
             CmdEnd("ok");
         }
 
-        protected void McuUpd(CmdLine cmd) {
+        protected void RtcCal(CmdLine cmd) {
 
-            bool arg_ok = false;
+            CmdStart(cmd, "rtc set...");
+            string msg;
+            int arg = cmd.getInt(Cli.ArgScmd);
 
-            string[] mode = {
-                Cli.ArgBoot,
-                Cli.ArgApp
-            };
+            msg = dcmd.RtcCal(arg);
+            CmdEnd("ok");
 
-            for (int i = 0; i < mode.Length; i++) {
+            ConsoleColor oldold_color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine(msg);
+            Console.ForegroundColor = oldold_color;
+        }
 
-                if (!cmd.HasArg(mode[i])) {
-                    continue;
-                }
-                arg_ok = true;
+        protected void McuApp(CmdLine cmd) {
 
-                CmdStart(cmd, "MCU upd " + mode[i].Replace(Cli.ArgPrefix, "") + "...");
-                string path = cmd.getStr(mode[i]);
-                dcmd.McuUpd(path, mode[i]);
-                CmdEnd("ok");
+            CmdStart(cmd, "mcu app install...");
+
+            string path = cmd.getStr(Cli.ArgFile);
+            dcmd.McuApp(path);
+
+            CmdEnd("ok");
+        }
+
+        protected void McuBoot(CmdLine cmd) {
+
+            CmdStart(cmd, "mcu boot install...");
+
+            string path = cmd.getStr(Cli.ArgFile);
+            dcmd.McuBoot(path);
+
+            CmdEnd("ok");
+        }
+
+        protected void UsbSpd(CmdLine cmd) {
+
+            CmdStart(cmd, "usb speed test...\n");
+
+            int addr = 0;
+            int len = 0x100000;
+
+            if (cmd.HasArg(Cli.ArgAddr)) {
+                addr = cmd.getInt(Cli.ArgAddr);
             }
 
-
-            if (!arg_ok) {
-                //force exception message
-                cmd.getStr(Cli.ArgBoot + " or " + Cli.ArgApp);
+            if (cmd.HasArg(Cli.ArgLen)) {
+                len = cmd.getInt(Cli.ArgLen);
             }
 
+            dcmd.UsbSpd(addr, len);
+        }
+
+        protected void Screen(CmdLine cmd) {
+
+            CmdStart(cmd, "taking screenshot...");
+
+            string path;
+
+            if (cmd.HasArg(Cli.ArgFile)) {
+                path = cmd.getStr(Cli.ArgFile);
+            } else {
+                string date = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                path = date.Replace(":", "").Replace(" ", "_").Replace(".", "-") + ".png";
+            }
+
+            dcmd.Screen(path);
+
+            CmdEnd("ok");
         }
         //************************************************************************************************ 
         void CopyFile(CmdLine cmd, string src, string dst) {

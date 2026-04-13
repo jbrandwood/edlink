@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Threading;
 
 namespace Edlink.Device {
     internal class DeviceCmd {
@@ -21,7 +22,7 @@ namespace Edlink.Device {
 
         }
 
-        public virtual void SetMode(string mode) {
+        public virtual void McuMode(string mode) {
 
             switch (mode) {
                 case Cli.ModeService:
@@ -84,7 +85,36 @@ namespace Edlink.Device {
         }
 
         public virtual void RtcSet() {
+
+            int sec = DateTime.Now.Second;
+            while (DateTime.Now.Second == sec) ;//sync time
             dev.rtcSet(DateTime.Now);
+        }
+
+        public virtual string RtcCal(int cmd) {
+
+            //cmd-0: set time and abort calibraion
+            //cmd-1: start calibration
+            //cmd-2: finish calibration
+            //cmd-3: get current calibration value
+            //cmd-4: get estimated calibration value
+            //cmd-5: get time deviation in ms
+
+            int resp;
+
+            int sec = DateTime.Now.Second;
+            while (DateTime.Now.Second == sec) ;//sync time
+
+            resp = dev.RtcCal(DateTime.Now, (byte)cmd);
+
+            string sig = resp > 0 ? "+" : "";
+
+
+            if (cmd == 5) {
+                return "rtc deviation: " + sig + resp + "ms";
+            } else {
+                return "rtc calibration: " + sig + resp;
+            }
         }
 
         public virtual void Reset() {
@@ -100,8 +130,41 @@ namespace Edlink.Device {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
-        public virtual void SpecialCmd(CmdLine cmd) {
-            throw new CmdException(CmdExceptionType.UnknownCmd);
+        public virtual void McuApp(string path) {
+
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
+
+        public virtual void McuBoot(string path) {
+
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
+        public virtual void Screen(string path) {
+
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
+
+
+        public void UsbSpd(int addr, int len) {
+
+            byte[] buff = new byte[len];
+            DateTime t;
+            long t_ms;
+
+            Console.Write("Read....");
+            t = DateTime.Now;
+            MemRD(addr, buff, 0, buff.Length);
+            t_ms = (DateTime.Now.Ticks - t.Ticks) / 10000;
+            Console.WriteLine((long)buff.Length * 1000 / t_ms / 1024 + " KB/s");
+
+            Console.Write("Write...");
+            t = DateTime.Now;
+            MemWR(addr, buff, 0, buff.Length);
+            t_ms = (DateTime.Now.Ticks - t.Ticks) / 10000;
+            Console.WriteLine((long)buff.Length * 1000 / t_ms / 1024 + " KB/s");
+        }
+
     }
 }

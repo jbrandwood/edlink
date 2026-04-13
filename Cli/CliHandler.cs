@@ -72,14 +72,14 @@ namespace Edlink {
                     continue;
                 }
 
-                if (cmd_list[i].Name.Equals(Cli.CmdSetMode)) {
+                if (cmd_list[i].Name.Equals(Cli.CmdMcuMode)) {
                     set_def_mode = false;
                 }
                 break;
             }
 
             if (set_def_mode && cmd_list.Length > 0) {
-                string[] mode_cmd = new string[] { Cli.CmdSetMode, Cli.ArgMode, Cli.ModeApp };
+                string[] mode_cmd = new string[] { Cli.CmdMcuMode, Cli.ArgMode, Cli.ModeApp };
                 cmd_list = CmdLine.Parse(mode_cmd).Concat(cmd_list).ToArray();
             }
         }
@@ -111,8 +111,8 @@ namespace Edlink {
 
             switch (cmd.Name) {
 
-                case Cli.CmdSetMode:
-                    base.SetMode(cmd);
+                case Cli.CmdMcuMode:
+                    base.McuMode(cmd);
                     break;
 
                 case Cli.CmdMemRd:
@@ -151,13 +151,28 @@ namespace Edlink {
                     base.RtcSet(cmd);
                     break;
 
-                case Cli.CmdMcuUpd:
-                    base.McuUpd(cmd);
+                case Cli.CmdRtcCal:
+                    base.RtcCal(cmd);
+                    break;
+
+                case Cli.CmdMcuApp:
+                    base.McuApp(cmd);
+                    break;
+
+                case Cli.CmdMcuBoot:
+                    base.McuBoot(cmd);
+                    break;
+
+                case Cli.CmdUsbSpd:
+                    base.UsbSpd(cmd);
+                    break;
+
+                case Cli.CmdScreen:
+                    base.Screen(cmd);
                     break;
 
                 default:
-                    dcmd.SpecialCmd(cmd);
-                    break;
+                    throw new CmdException(CmdExceptionType.UnknownCmd);
             }
         }
 

@@ -21,5 +21,7 @@ namespace Edlink.Device {
         void fileRead(byte[] buff, int offset, int len);
         void fileWrite(byte[] buff, int offset, int len);
         void rtcSet(DateTime dt);
+        int RtcCal(DateTime dt, byte arg);
+        void RtcCalSet(int ppm_val);
     }
 }

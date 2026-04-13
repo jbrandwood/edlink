@@ -51,6 +51,8 @@ namespace Edlink.ED64 {
         const byte CMD_RTC = 0x83;
         const byte RTC_SCMD_GET = 0x10;
         const byte RTC_SCMD_SET = 0x11;
+        const byte RTC_SCMD_CAL = 0x12;
+        const byte RTC_SCMD_CALSET = 0x13;
 
         const byte CMD_SYS = 0x84;
         const byte SYS_SCMD_FPG_INIT = 0x12;
@@ -220,9 +222,37 @@ namespace Edlink.ED64 {
             link.txData(vals, 0, 8);
         }
 
-        public void mcuAppLoad(byte[] data) {
+        public int RtcCal(DateTime dt, byte arg) {
+
+            RtcTime rtc = new RtcTime(dt);
+            byte[] vals = rtc.getVals();
+
+            link.txCMD(CMD_RTC, RTC_SCMD_CAL);
+            link.txData(vals);
+            link.tx8(arg);
+
+            return link.rx32();
+        }
+
+        public void RtcCalSet(int ppm_val) {
+
+            link.txCMD(CMD_RTC, RTC_SCMD_CALSET);
+            link.tx32(ppm_val);
+            checkStatus();
+        }
+
+        public void McuAppLoad(byte[] data) {
 
             link.txCMD(CMD_BOOT, BOOT_SCMD_LOAD_APP);
+            txApp(data);
+
+            bootWait(2);
+            checkStatus();
+        }
+
+        public void McuBootInstall(byte[] data) {
+
+            link.txCMD(CMD_SYS, SYS_SCMD_BOOT_UPD);
             txApp(data);
 
             bootWait(2);
