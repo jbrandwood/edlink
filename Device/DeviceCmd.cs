@@ -26,10 +26,10 @@ namespace Edlink.Device {
 
             switch (mode) {
                 case Cli.ModeService:
-                    dev.enterServiceMode();
+                    dev.EnterServiceMode();
                     break;
                 case Cli.ModeApp:
-                    dev.exitServiceMode();
+                    dev.ExitServiceMode();
                     break;
                 default:
                     throw new CmdException(CmdExceptionType.Mode, mode);
@@ -58,7 +58,7 @@ namespace Edlink.Device {
 
         public virtual void FpgaInit(string path) {
             byte[] buff = File.ReadAllBytes(path);
-            dev.fpgInit(buff);
+            dev.FpgInit(buff);
         }
 
         public virtual void CopyFile(string src, string dst) {
@@ -66,19 +66,19 @@ namespace Edlink.Device {
             byte[] buff;
 
             if (Link.IsDevPath(src)) {
-                dev.fileOpen(Link.GetPath(src), DeviceIO.FA_READ);
-                buff = new byte[dev.fileAvailable()];
-                dev.fileRead(buff, 0, buff.Length);
-                dev.fileClose();
+                dev.FileOpen(Link.GetPath(src), DeviceIO.FA_READ);
+                buff = new byte[dev.FileAvailable()];
+                dev.FileRead(buff, 0, buff.Length);
+                dev.FileClose();
             } else {
                 buff = File.ReadAllBytes(src);
             }
 
 
             if (Link.IsDevPath(dst)) {
-                dev.fileOpen(Link.GetPath(dst), DeviceIO.FA_WRITE | DeviceIO.FA_CREATE_ALWAYS | DeviceIO.FS_MAKEPATH);
-                dev.fileWrite(buff, 0, buff.Length);
-                dev.fileClose();
+                dev.FileOpen(Link.GetPath(dst), DeviceIO.FA_WRITE | DeviceIO.FA_CREATE_ALWAYS | DeviceIO.FS_MAKEPATH);
+                dev.FileWrite(buff, 0, buff.Length);
+                dev.FileClose();
             } else {
                 File.WriteAllBytes(dst, buff);
             }
@@ -88,7 +88,7 @@ namespace Edlink.Device {
 
             int sec = DateTime.Now.Second;
             while (DateTime.Now.Second == sec) ;//sync time
-            dev.rtcSet(DateTime.Now);
+            dev.RtcSet(DateTime.Now);
         }
 
         public virtual string RtcCal(int cmd) {
@@ -100,22 +100,33 @@ namespace Edlink.Device {
             //cmd-4: get estimated calibration value
             //cmd-5: get time deviation in ms
 
-            int resp;
-
-            int sec = DateTime.Now.Second;
-            while (DateTime.Now.Second == sec) ;//sync time
-
-            resp = dev.RtcCal(DateTime.Now, (byte)cmd);
+            int resp = 0;
+            long delta = NtpTime.GetDeltaTicks();
+            int sec = NtpTime.GetDeltaTime(delta).Second;
+            while (NtpTime.GetDeltaTime(delta).Second == sec) ;//sync time to the edge of second
+            resp = dev.RtcCal(NtpTime.GetDeltaTime(delta), (byte)cmd);
 
             string sig = resp > 0 ? "+" : "";
+            string msg = "";
 
+            msg += "local time deviation: " + delta / TimeSpan.FromMilliseconds(1).Ticks + "ms\n";
 
             if (cmd == 5) {
-                return "rtc deviation: " + sig + resp + "ms";
+                msg += "rtc deviation: " + sig + resp + "ms";
             } else {
-                return "rtc calibration: " + sig + resp;
+                msg += "rtc calibration: " + sig + resp;
             }
+
+            return msg;
         }
+
+        public byte[] ConsoleRead() {
+
+            byte[] buff = new byte[dev.Link.BytesToRead];
+            dev.Link.rxData(buff, 0, buff.Length);
+            return buff;
+        }
+
 
         public virtual void Reset() {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
@@ -145,25 +156,8 @@ namespace Edlink.Device {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
-
-
-        public void UsbSpd(int addr, int len) {
-
-            byte[] buff = new byte[len];
-            DateTime t;
-            long t_ms;
-
-            Console.Write("Read....");
-            t = DateTime.Now;
-            MemRD(addr, buff, 0, buff.Length);
-            t_ms = (DateTime.Now.Ticks - t.Ticks) / 10000;
-            Console.WriteLine((long)buff.Length * 1000 / t_ms / 1024 + " KB/s");
-
-            Console.Write("Write...");
-            t = DateTime.Now;
-            MemWR(addr, buff, 0, buff.Length);
-            t_ms = (DateTime.Now.Ticks - t.Ticks) / 10000;
-            Console.WriteLine((long)buff.Length * 1000 / t_ms / 1024 + " KB/s");
+        public virtual string DevInf() {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
     }

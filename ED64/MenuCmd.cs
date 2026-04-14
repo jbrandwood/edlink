@@ -25,7 +25,7 @@ namespace Edlink.ED64 {
 
             int resp;
 
-            dev.fifoWR("*t");
+            dev.FifoWR("*t");
 
             try {
                 resp = link.rx8();
@@ -42,9 +42,9 @@ namespace Edlink.ED64 {
         internal void RunPreloaded(string fname, int mode) {
 
             //run preloaded in memory rom
-            dev.fifoWR("*r");
-            dev.fifoWR(new byte[] { (byte)mode }, 0, 1);
-            dev.fifoTxString(fname);
+            dev.FifoWR("*r");
+            dev.FifoWR(new byte[] { (byte)mode }, 0, 1);
+            dev.FifoTxString(fname);
 
             int resp = link.rx8();
             if (resp != 0) {
@@ -77,8 +77,8 @@ namespace Edlink.ED64 {
         void RunSDC(string path) {
 
             //run file from sd card
-            dev.fifoWR("*f");
-            dev.fifoTxString(path);
+            dev.FifoWR("*f");
+            dev.FifoTxString(path);
 
 
             int resp = link.waitResp(7000);
@@ -89,14 +89,14 @@ namespace Edlink.ED64 {
 
         void SetGpakSize(int size) {
 
-            dev.fifoWR("*g");
-            dev.fifoWR(link.num32(size), 0, 4);
+            dev.FifoWR("*g");
+            dev.FifoWR(link.num32(size), 0, 4);
         }
 
         int GetEntry(int mode) {
 
-            dev.fifoWR("*a");
-            dev.fifoWR(new byte[] { (byte)mode }, 0, 1);
+            dev.FifoWR("*a");
+            dev.FifoWR(new byte[] { (byte)mode }, 0, 1);
             return link.rx32();
         }
 

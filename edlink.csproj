@@ -56,8 +56,12 @@
     <Compile Include="ED64\MenuCmd.cs" />
     <Compile Include="ED64\DeviceIO.cs" />
     <Compile Include="Device\Link.cs" />
+    <Compile Include="EDMEGA\DeviceCmd.cs" />
+    <Compile Include="EDMEGA\DeviceIO.cs" />
+    <Compile Include="NtpTime.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tools.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

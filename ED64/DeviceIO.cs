@@ -55,6 +55,7 @@ namespace Edlink.ED64 {
         const byte RTC_SCMD_CALSET = 0x13;
 
         const byte CMD_SYS = 0x84;
+        const byte SYS_SCMD_GET_INF = 0x10;
         const byte SYS_SCMD_FPG_INIT = 0x12;
         const byte SYS_SCMD_BOOT_UPD = 0x14;
 
@@ -62,19 +63,32 @@ namespace Edlink.ED64 {
         const byte BOOT_SCMD_APP_MODE = 0x10;
         const byte BOOT_SCMD_LOAD_APP = 0x11;
 
-        //*************************************************
+        //************************************************* EPO flags
         const byte EPO_WER_SRC = 0x01;
         const byte EPO_WER_DST = 0x02;
 
-        const byte EPO_LINK = 0x10;//link (usb or console)
-        const byte EPO_LINK_ACK = 0x11;//link (usb or console)
-        const byte EPO_LINK_FS = 0x12;//file system
-        const byte EPO_FS = 0x12; //file
-        const byte EPO_FCI = 0x13; //ed mem
-        const byte EPO_FLA = 0x14; //mcu flash
-        const byte EPO_EFU = 0x15; //efu in flash
-        const byte EPO_USB = 0x18; //efu in flash
-
+        enum EpoType {
+            LINK = 0x10,//  link (usb or console)
+            LINK_ACK, //    link (usb or console)
+            FS, //          file
+            FCI, //         ed mem
+            FLA, //         mcu flash
+            EFU, //         efu in flash
+            USB,//          efu in flash
+        }
+        //************************************************* RTCC
+        public enum Rtcc {
+            SET_TIME,
+            CAL_START,
+            CAL_END,
+            GET_CURCAL,
+            GET_ESTCAL,
+            GET_DEVIAT,
+            GET_SETCAL,
+            MCO_OFF,
+            MCO_ON,
+        }
+        //************************************************* FS flags
         public const byte FA_READ = 0x01;
         public const byte FA_WRITE = 0x02;
         public const byte FA_OPEN_EXISTING = 0x00;
@@ -83,13 +97,43 @@ namespace Edlink.ED64 {
         public const byte FA_OPEN_ALWAYS = 0x10;
         public const byte FA_OPEN_APPEND = 0x30;
         public const byte FS_MAKEPATH = 0x80; //make path if not exists
-
+        //*************************************************
         public const int BMOD_MCU_APP = 0xA0;//app mode
         public const int BMOD_MCU_SER = 0xA1;//service mode
 
         public const int ADDR_FCI_SYS = 0x10000000;               //system registers
         public const int ADDR_FCI_FIFO = (ADDR_FCI_SYS + 0x10000);    //mcu fifo
-        public const int ADDR_FCI_MREQ = (ADDR_FCI_SYS + 0x30000);    //mcu fifo
+
+        public enum SysInf {
+
+            //static vals
+            INFS_DEV_ID = 1,
+            INFS_HW_VER,
+            INFS_SERIAL_G,
+            INFS_SERIAL_L,
+            INFS_TS_ASM,
+            INFS_TS_FW,
+            INFS_TS_BOOT,
+            INFS_FLA_SIZE,
+            INFS_MAX_ROM_SIZE,
+            INFS_TS_CIC,
+
+            //dynamic vals
+            INFD_BOOT_CTR = 128,
+            INFD_GAME_CTR,
+            INFD_RST_SRC,
+            INFD_BOOT_MODE,
+            INFD_PWR_SYS,
+            INFD_PWR_USB,
+            INFD_BAT_DRY,
+            INFD_VCC_BAT,
+            INFD_VCC_1V2,
+            INFD_VCC_1V8,
+            INFD_VCC_2V5,
+            INFD_VCC_3V3,
+            INFD_VCC_5V0,
+        }
+
 
         Link link;
 
@@ -107,32 +151,32 @@ namespace Edlink.ED64 {
             get { return link; }
         }
 
-        public void exitServiceMode() {
+        public void ExitServiceMode() {
 
-            if (!isServiceMode()) {
+            if (!IsServiceMode()) {
                 return;
             }
 
             link.txCMD(CMD_BOOT, BOOT_SCMD_APP_MODE);
 
-            bootWait();
-            if (isServiceMode()) {
+            BootWait();
+            if (IsServiceMode()) {
                 throw new Exception("failed to exit service mode");
             }
         }
 
-        public void enterServiceMode() {
+        public void EnterServiceMode() {
 
-            if (isServiceMode()) {
+            if (IsServiceMode()) {
                 return;
             }
 
             link.txCMD(CMD_IO_RST);
             link.tx8(BMOD_MCU_SER);
 
-            bootWait();
+            BootWait();
 
-            if (!isServiceMode()) {
+            if (!IsServiceMode()) {
                 throw new Exception("failed to enter service mode");
             }
         }
@@ -142,7 +186,7 @@ namespace Edlink.ED64 {
             if (len == 0) {
                 return;
             }
-            epoWR(EPO_FCI, addr, buff, offset, len);
+            EpoWR(EpoType.FCI, addr, buff, offset, len);
         }
 
         public void MemRD(int addr, byte[] buff, int offset, int len) {
@@ -151,7 +195,7 @@ namespace Edlink.ED64 {
                 return;
 
             }
-            epoRD(EPO_FCI, addr, buff, offset, len);
+            EpoRD(EpoType.FCI, addr, buff, offset, len);
         }
 
         public void FlaRD(int addr, byte[] buff, int offset, int len) {
@@ -159,7 +203,7 @@ namespace Edlink.ED64 {
             if (len == 0) {
                 return;
             }
-            epoRD(EPO_FLA, addr, buff, offset, len);
+            EpoRD(EpoType.FLA, addr, buff, offset, len);
         }
 
         public void FlaWR(int addr, byte[] buff, int offset, int len) {
@@ -167,34 +211,34 @@ namespace Edlink.ED64 {
             if (len == 0) {
                 return;
             }
-            epoWre();
-            epoWR(EPO_FLA, addr, buff, offset, len);
+            EpoWre();
+            EpoWR(EpoType.FLA, addr, buff, offset, len);
         }
 
-        public void fpgInit(byte[] data) {
+        public void FpgInit(byte[] data) {
 
             bool header = false;
             link.txCMD(CMD_SYS, SYS_SCMD_FPG_INIT);
             link.tx32(header ? 0 : data.Length);
-            link.tx8(EPO_LINK_ACK);
+            link.tx8((int)EpoType.LINK_ACK);
             link.txDataACK(data, 0, data.Length);
-            checkStatus();
+            CheckStatus();
         }
 
-        public void fileOpen(string path, int mode) {
+        public void FileOpen(string path, int mode) {
 
             link.txCMD(CMD_FS, FS_SCMD_FOPN);
             link.tx8(mode);
             link.txString(path);
-            checkStatus();
+            CheckStatus();
         }
-        public void fileClose() {
+        public void FileClose() {
 
             link.txCMD(CMD_FS, FS_SCMD_FCLOSE);
-            checkStatus();
+            CheckStatus();
         }
 
-        public UInt64 fileAvailable() {
+        public UInt64 FileAvailable() {
 
             link.txCMD(CMD_FS, FS_SCMD_AVB);
 
@@ -204,17 +248,17 @@ namespace Edlink.ED64 {
             return lo | (hi << 32);
         }
 
-        public void fileRead(byte[] buff, int offset, int len) {
+        public void FileRead(byte[] buff, int offset, int len) {
 
-            epoRD(EPO_FS, 0, buff, offset, len);
+            EpoRD(EpoType.FS, 0, buff, offset, len);
         }
 
-        public void fileWrite(byte[] buff, int offset, int len) {
+        public void FileWrite(byte[] buff, int offset, int len) {
 
-            epoWR(EPO_FS, 0, buff, offset, len);
+            EpoWR(EpoType.FS, 0, buff, offset, len);
         }
 
-        public void rtcSet(DateTime dt) {
+        public void RtcSet(DateTime dt) {
 
             RtcTime rtc = new RtcTime(dt);
             byte[] vals = rtc.getVals();
@@ -238,60 +282,83 @@ namespace Edlink.ED64 {
 
             link.txCMD(CMD_RTC, RTC_SCMD_CALSET);
             link.tx32(ppm_val);
-            checkStatus();
+            CheckStatus();
         }
 
         public void McuAppLoad(byte[] data) {
 
             link.txCMD(CMD_BOOT, BOOT_SCMD_LOAD_APP);
-            txApp(data);
+            TxApp(data);
 
-            bootWait(2);
-            checkStatus();
+            BootWait(2);
+            CheckStatus();
         }
 
         public void McuBootInstall(byte[] data) {
 
             link.txCMD(CMD_SYS, SYS_SCMD_BOOT_UPD);
-            txApp(data);
+            TxApp(data);
 
-            bootWait(2);
-            checkStatus();
+            BootWait(2);
+            CheckStatus();
         }
         //************************************************************************************************ internal
-        internal void fifoWR(string str) {
+        internal void FifoWR(string str) {
 
             byte[] bytes = Encoding.ASCII.GetBytes(str);
-            fifoWR(bytes, 0, bytes.Length);
+            FifoWR(bytes, 0, bytes.Length);
         }
 
-        internal void fifoWR(byte[] data, int offset, int len) {
+        internal void FifoWR(byte[] data, int offset, int len) {
 
             MemWR(ADDR_FCI_FIFO, data, offset, len);
         }
 
-        internal void fifoTxString(string str) {
+        internal void FifoTxString(string str) {
 
             byte[] bytes = Encoding.ASCII.GetBytes(str);
             byte[] len = link.num16(bytes.Length);
-            fifoWR(len, 0, 2);
-            fifoWR(bytes, 0, bytes.Length);
+            FifoWR(len, 0, 2);
+            FifoWR(bytes, 0, bytes.Length);
+        }
+
+        internal int[] SysGetInf(SysInf[] request) {
+
+            int[] resp = new int[request.Length];
+
+            link.txCMD(CMD_SYS, SYS_SCMD_GET_INF);
+            link.tx8(request.Length);
+
+
+            for (int i = 0; i < request.Length; i++) {
+                link.tx32((int)request[i]);
+            }
+
+            for (int i = 0; i < request.Length; i++) {
+                resp[i] = link.rx32();
+            }
+
+            return resp;
+        }
+
+        internal int SysGetInf(SysInf request) {
+            return SysGetInf(new SysInf[] { request })[0];
         }
         //************************************************************************************************ private
-        byte[] getID() {
+        byte[] GetID() {
 
             link.txCMD(CMD_STATUS);
             return link.rxData(4);
         }
 
-        int getNresp(int resp) {
+        int GetNresp(int resp) {
             link.txCMD(CMD_NRESP);
             link.tx8(resp);
             return link.rx8();
         }
-        int getStatus() {
+        int GetStatus() {
 
-            byte[] resp = getID();
+            byte[] resp = GetID();
 
             if (resp[0] != STATUS_KEY || resp[1] != PROTOCOL_ID) {
                 throw new Exception("unexpected status response (" + BitConverter.ToString(resp) + ")");
@@ -299,16 +366,16 @@ namespace Edlink.ED64 {
             return resp[3];
         }
 
-        void checkStatus() {
+        void CheckStatus() {
 
-            int resp = getStatus();
+            int resp = GetStatus();
             if (resp != 0) {
-                int nresp = getNresp(resp);
+                int nresp = GetNresp(resp);
                 throw new Exception("operation error: " + resp.ToString("X2") + "." + nresp.ToString("X2"));
             }
         }
 
-        bool isServiceMode() {
+        bool IsServiceMode() {
 
             link.txCMD(CMD_GET_MODE);
             byte resp = link.rx8();
@@ -321,56 +388,56 @@ namespace Edlink.ED64 {
         }
 
 
-        void epoWre() {
+        void EpoWre() {
 
             link.txCMD(CMD_EPO, EPO_SCMD_WRE);
             link.tx32(0x27101983);//flash wr protection magic number
         }
 
-        void epoCmd(byte ep_src, byte ep_dst, int addr_src, int addr_dst, int len) {
+        void EpoCmd(EpoType ep_src, EpoType ep_dst, int addr_src, int addr_dst, int len) {
 
             link.txCMD(CMD_EPO, EPO_SCMD_XFER);
             link.tx32(addr_src);
             link.tx32(addr_dst);
             link.tx32(len);
-            link.tx8(ep_src);
-            link.tx8(ep_dst);
+            link.tx8((int)ep_src);
+            link.tx8((int)ep_dst);
             link.tx16(0);//reserved(for aligment)
 
             link.tx8(0);//ack
         }
 
-        void epoRD(byte epo_src, int addr, byte[] buff, int offset, int len) {
+        void EpoRD(EpoType epo_src, int addr, byte[] buff, int offset, int len) {
 
-            epoCmd(epo_src, EPO_LINK, addr, 0, len);
+            EpoCmd(epo_src, EpoType.LINK, addr, 0, len);
             link.rxData(buff, offset, len);
-            checkStatus();
+            CheckStatus();
         }
 
-        void epoWR(byte epo_dst, int addr, byte[] buff, int offset, int len) {
+        void EpoWR(EpoType epo_dst, int addr, byte[] buff, int offset, int len) {
 
-            byte epo_src = EPO_LINK; ;
+            EpoType epo_src = EpoType.LINK;
 
-            if (epo_dst == EPO_FLA || epo_dst == EPO_FS) {
-                epo_src = EPO_LINK_ACK;
+            if (epo_dst == EpoType.FLA || epo_dst == EpoType.FS) {
+                epo_src = EpoType.LINK_ACK;
             }
 
-            epoCmd(epo_src, epo_dst, 0, addr, len);
+            EpoCmd(epo_src, epo_dst, 0, addr, len);
 
-            if (epo_src == EPO_LINK_ACK) {
+            if (epo_src == EpoType.LINK_ACK) {
                 link.txDataACK(buff, offset, len);
             } else {
                 link.txData(buff, offset, len);
             }
 
-            checkStatus();
+            CheckStatus();
         }
 
-        void bootWait() {
-            bootWait(5);
+        void BootWait() {
+            BootWait(5);
         }
 
-        void bootWait(int max_time_sec) {
+        void BootWait(int max_time_sec) {
 
             var sw = Stopwatch.StartNew();
 
@@ -397,7 +464,7 @@ namespace Edlink.ED64 {
             }
         }
 
-        void txApp(byte[] data) {
+        void TxApp(byte[] data) {
 
             link.tx32(data.Length);
             link.txDataACK(data, 0, 512);

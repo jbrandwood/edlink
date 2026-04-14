@@ -62,6 +62,10 @@ namespace Edlink.Device {
             get { return swap_endians; }
             set { swap_endians = value; }
         }
+
+        public int BytesToRead {
+            get { return port.BytesToRead; }
+        }
         //************************************************************************************************
         public void Open() {
 
@@ -120,6 +124,7 @@ namespace Edlink.Device {
         public void txData(byte[] buff) {
             txData(buff, 0, buff.Length);
         }
+
 
         public void txData(byte[] buff, int offset, int len) {
 
@@ -324,7 +329,7 @@ namespace Edlink.Device {
                 port = new SerialPort(pname);
                 port.ReadTimeout = 200;
                 port.WriteTimeout = 200;
-                port.BaudRate = 921600;
+                //port.BaudRate = 921600;
                 port.Open();
                 txData(new byte[64 + 2]);
                 FlushPort();

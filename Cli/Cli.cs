@@ -37,14 +37,15 @@ namespace Edlink {
         public const string CmdFpga = "fpga";
         public const string CmdCp = "cp";
         public const string CmdRtcSet = "rtcset";
-        public const string CmdRtcCal = "rtccal";//
+        public const string CmdRtcCal = "rtccal";
         public const string CmdMcuBoot = "mcuboot";
         public const string CmdMcuApp = "mcuapp";
         public const string CmdUsbSpd = "usbspd";
+        public const string CmdDevInf = "devinf";
         public const string CmdScreen = "screen";//
+        public const string CmdUsbPrint = "usbprint";
         public const string CmdDiag = "diag";//
         public const string CmdNetGame = "netgate";//
-        public const string CmdUsbPrint = "usbprint";//
 
         //ArgMode
         public const string ModeApp = "app";

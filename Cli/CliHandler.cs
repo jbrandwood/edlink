@@ -167,6 +167,14 @@ namespace Edlink {
                     base.UsbSpd(cmd);
                     break;
 
+                case Cli.CmdDevInf:
+                    base.DevInf(cmd);
+                    break;
+
+                case Cli.CmdUsbPrint:
+                    base.UsbPrint(cmd);
+                    break;
+
                 case Cli.CmdScreen:
                     base.Screen(cmd);
                     break;

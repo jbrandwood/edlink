@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
+using static System.Net.WebRequestMethods;
 
 namespace Edlink {
     internal class Program {
@@ -25,9 +26,11 @@ namespace Edlink {
 
             //args = new string[] { "mcuupd", "--boot", "xxx.bin",  "--app"};
 
+            //args = new string[] { "devinf"};
+
             long time = DateTime.Now.Ticks;
 
-            CliHandler cmd = null;
+            CliHandler cmd = null;           
 
             /*
             cmd = new CliHandler(args);

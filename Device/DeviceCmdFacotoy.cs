@@ -13,8 +13,8 @@ namespace Edlink.Device {
 
                 case ED64.DeviceIO.PROTOCOL_ID:
                     return new ED64.DeviceCmd(link);
-                //case MEGA.CliHandler.PROTOCOL_ID:
-                // return new MEGA.CliHandler(link);
+                case EDMEGA.DeviceIO.PROTOCOL_ID:
+                    return new EDMEGA.DeviceCmd(link);
                 default:
                     throw new NotSupportedException("unsupported protocol id: 0x" + link.ProtocolID.ToString("X02"));
             }

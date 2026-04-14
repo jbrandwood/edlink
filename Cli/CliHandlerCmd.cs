@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Edlink.Device;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -6,8 +7,9 @@ using System.Linq;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using Edlink.Device;
+using System.Web;
 
 namespace Edlink {
     internal class CliHandlerCmd {
@@ -202,17 +204,14 @@ namespace Edlink {
 
         protected void RtcCal(CmdLine cmd) {
 
-            CmdStart(cmd, "rtc set...");
+            CmdStart(cmd, "rtc cal...");
             string msg;
             int arg = cmd.getInt(Cli.ArgScmd);
 
             msg = dcmd.RtcCal(arg);
             CmdEnd("ok");
 
-            ConsoleColor oldold_color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(msg);
-            Console.ForegroundColor = oldold_color;
+            Tools.PrintLine(msg, ConsoleColor.Green);
         }
 
         protected void McuApp(CmdLine cmd) {
@@ -250,7 +249,64 @@ namespace Edlink {
                 len = cmd.getInt(Cli.ArgLen);
             }
 
-            dcmd.UsbSpd(addr, len);
+
+            byte[] buff = new byte[len];
+            DateTime t;
+            long t_ms;
+
+            ConsoleColor old_color = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Green;
+
+            Console.Write("Read....");
+            t = DateTime.Now;
+            dcmd.MemRD(addr, buff, 0, buff.Length);
+            t_ms = (DateTime.Now.Ticks - t.Ticks) / 10000;
+            t_ms = Math.Max(t_ms, 1);
+            Console.WriteLine((long)buff.Length * 1000 / t_ms / 1024 + " KB/s");
+
+            Console.Write("Write...");
+            t = DateTime.Now;
+            dcmd.MemWR(addr, buff, 0, buff.Length);
+            t_ms = (DateTime.Now.Ticks - t.Ticks) / 10000;
+            t_ms = Math.Max(t_ms, 1);
+            Console.WriteLine((long)buff.Length * 1000 / t_ms / 1024 + " KB/s");
+
+            Console.ForegroundColor = old_color;
+        }
+
+        protected void DevInf(CmdLine cmd) {
+
+            CmdStart(cmd, "\n");
+            string msg = dcmd.DevInf();
+
+            Tools.PrintLine(msg, ConsoleColor.Green);
+        }
+
+        protected void UsbPrint(CmdLine cmd) {
+
+            CmdStart(cmd, "\n");
+
+            Console.WriteLine("Press CTRL+X to exit");
+
+            while (true) {
+
+                if (Console.KeyAvailable) {
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.X && key.Modifiers.HasFlag(ConsoleModifiers.Control)) {
+                        break;
+                    }
+                }
+
+                byte[] buff = dcmd.ConsoleRead();
+                if (buff.Length == 0) {
+                    Thread.Sleep(1);
+                    continue;
+                }
+
+                string msg = Encoding.UTF8.GetString(buff);
+                Tools.Print(msg, ConsoleColor.Green);
+            }
+
         }
 
         protected void Screen(CmdLine cmd) {
