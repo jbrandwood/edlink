@@ -19,7 +19,6 @@ namespace Edlink.Device {
         }
 
         public virtual void Stop() {
-
         }
 
         public virtual void McuMode(string mode) {
@@ -61,12 +60,12 @@ namespace Edlink.Device {
             dev.FpgInit(buff);
         }
 
-        public virtual void CopyFile(string src, string dst) {
+        public virtual void FileCopy(string src, string dst) {
 
             byte[] buff;
 
             if (Link.IsDevPath(src)) {
-                dev.FileOpen(Link.GetPath(src), DeviceIO.FA_READ);
+                dev.FileOpen(Link.GetDevPath(src), DeviceIO.FA_READ);
                 buff = new byte[dev.FileAvailable()];
                 dev.FileRead(buff, 0, buff.Length);
                 dev.FileClose();
@@ -76,7 +75,7 @@ namespace Edlink.Device {
 
 
             if (Link.IsDevPath(dst)) {
-                dev.FileOpen(Link.GetPath(dst), DeviceIO.FA_WRITE | DeviceIO.FA_CREATE_ALWAYS | DeviceIO.FS_MAKEPATH);
+                dev.FileOpen(Link.GetDevPath(dst), DeviceIO.FA_WRITE | DeviceIO.FA_CREATE_ALWAYS | DeviceIO.FS_MAKEPATH);
                 dev.FileWrite(buff, 0, buff.Length);
                 dev.FileClose();
             } else {
@@ -128,7 +127,7 @@ namespace Edlink.Device {
         }
 
 
-        public virtual void Reset() {
+        public virtual void Reset(string mode) {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 

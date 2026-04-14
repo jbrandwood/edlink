@@ -154,8 +154,16 @@ namespace Edlink {
         }
 
         protected void Reset(CmdLine cmd) {
+
             CmdStart(cmd, "device reset...");
-            dcmd.Reset();
+
+            string mode = "";
+
+            if (cmd.HasArg(Cli.ArgMode)) {
+                mode = cmd.getStr(Cli.ArgMode);
+            }
+
+            dcmd.Reset(mode);
             CmdEnd("ok");
         }
 
@@ -167,7 +175,7 @@ namespace Edlink {
             string fpga_path = null;
 
             if (cmd.HasArg(Cli.ArgFpga)) {
-                fpga_path = cmd.getStr(fpga_path);
+                fpga_path = cmd.getStr(Cli.ArgFpga);
             }
 
             dcmd.Run(rom_path, fpga_path);
@@ -330,7 +338,7 @@ namespace Edlink {
         void CopyFile(CmdLine cmd, string src, string dst) {
 
             CmdStart(cmd, src + " --> " + dst);
-            dcmd.CopyFile(src, dst);
+            dcmd.FileCopy(src, dst);
             CmdEnd("");
         }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -16,6 +17,9 @@ namespace Edlink {
 
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("edlink v" + Assembly.GetEntryAssembly().GetName().Version);
+
+            //Console.WriteLine("zzzz: "+ Path.GetDirectoryName("d:/zelda/biba/pip.bin")); 
+            //args = new string[] { ".link", "--dev-id", "0x18" };
 
             //args = new string[] { "link", "--dcmd-id", "0x27"};
             //args = new string[] { "memprint", "--addr", "0xFF00000" };

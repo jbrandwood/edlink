@@ -38,24 +38,15 @@ namespace Edlink.ED64 {
             }
         }
 
+        internal void ResetToMenu() {
 
-        internal void RunPreloaded(string fname, int mode) {
-
-            //run preloaded in memory rom
-            dev.FifoWR("*r");
-            dev.FifoWR(new byte[] { (byte)mode }, 0, 1);
-            dev.FifoTxString(fname);
-
-            int resp = link.rx8();
-            if (resp != 0) {
-                throw new Exception("mcmd: cmd error: " + resp.ToString("X2"));
-            }
+            RunPreloaded("", MenuCmd.MODE_MENU);
         }
 
         internal void Run(string path) {
 
             if (Link.IsDevPath(path)) {
-                RunSDC(Link.GetPath(path));
+                RunSDC(Link.GetDevPath(path));
             } else {
                 RunUSB(path);
             }
@@ -82,6 +73,19 @@ namespace Edlink.ED64 {
 
 
             int resp = link.waitResp(7000);
+            if (resp != 0) {
+                throw new Exception("mcmd: cmd error: " + resp.ToString("X2"));
+            }
+        }
+
+        void RunPreloaded(string fname, int mode) {
+
+            //run preloaded in memory rom
+            dev.FifoWR("*r");
+            dev.FifoWR(new byte[] { (byte)mode }, 0, 1);
+            dev.FifoTxString(fname);
+
+            int resp = link.rx8();
             if (resp != 0) {
                 throw new Exception("mcmd: cmd error: " + resp.ToString("X2"));
             }

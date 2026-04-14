@@ -33,10 +33,10 @@ namespace Edlink.ED64 {
             }
         }
 
-        public override void Reset() {
+        public override void Reset(string mode) {
 
             mcmd.Test();
-            mcmd.RunPreloaded("", MenuCmd.MODE_MENU);
+            mcmd.ResetToMenu();   
         }
 
         public override void Run(string rom_path, string fpga_path) {

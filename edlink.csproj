@@ -48,6 +48,7 @@
     <Compile Include="Cli\CmdLine.cs" />
     <Compile Include="Cli\CliHandler.cs" />
     <Compile Include="Device\DeviceCmd.cs" />
+    <Compile Include="Device\DeviceIO_V1.cs" />
     <Compile Include="Device\RtcTime.cs" />
     <Compile Include="ED64\DeviceCmd.cs" />
     <Compile Include="Device\IDeviceIO.cs" />
@@ -58,6 +59,9 @@
     <Compile Include="Device\Link.cs" />
     <Compile Include="EDMEGA\DeviceCmd.cs" />
     <Compile Include="EDMEGA\DeviceIO.cs" />
+    <Compile Include="EDMEGA\MenuCmd.cs" />
+    <Compile Include="EDN8\DeviceCmd.cs" />
+    <Compile Include="EDN8\DeviceIO.cs" />
     <Compile Include="NtpTime.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

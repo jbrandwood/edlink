@@ -345,12 +345,6 @@ namespace Edlink.ED64 {
             return SysGetInf(new SysInf[] { request })[0];
         }
         //************************************************************************************************ private
-        byte[] GetID() {
-
-            link.txCMD(CMD_STATUS);
-            return link.rxData(4);
-        }
-
         int GetNresp(int resp) {
             link.txCMD(CMD_NRESP);
             link.tx8(resp);
@@ -358,7 +352,7 @@ namespace Edlink.ED64 {
         }
         int GetStatus() {
 
-            byte[] resp = GetID();
+            byte[] resp = link.GetID();
 
             if (resp[0] != STATUS_KEY || resp[1] != PROTOCOL_ID) {
                 throw new Exception("unexpected status response (" + BitConverter.ToString(resp) + ")");

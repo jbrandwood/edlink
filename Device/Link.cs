@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
@@ -11,13 +12,32 @@ namespace Edlink.Device {
     internal class Link {
 
         const byte STATUS_KEY = 0x5A;
+        const byte STATUS_KEY_OLD = 0xA5;
+
+        const byte DEVICE_ID_MEGA_PRO = 0x18;
+        const byte DEVICE_ID_N8_PRO = 0x17;
+        const byte PROTOCOL_ID_MEGA = 0x05;
+        const byte PROTOCOL_ID_N8 = 0x06;
+
 
         const byte CMD_STATUS = 0x10;
-        const byte CMD_STATUS2 = 0x40;//only for mega and n8        
+        const byte CMD_STATUS2 = 0x40;//only for mega and n8  
+
+
+        enum Protocol {
+            Unknown,
+            Gen1,//old n8 and mega firmware
+            Gen2,//new n8 and mega firmware
+            Gen3,//everything else
+        }
+
+        struct DeviceConfig {
+            public Protocol ProtocolGen;
+            public byte ProtocolId;
+            public byte DeviceId;
+        }
 
         SerialPort port;
-        byte device_id = 0;
-        byte protocol_id = 0;
         bool swap_endians = true;
         int ack_block_size = 1024;
         bool cfg_locked = false;
@@ -27,7 +47,15 @@ namespace Edlink.Device {
 
         string[] port_blk = new string[0];
 
+
+        DeviceConfig dcfg;
+
+
         public Link() {
+
+            dcfg.ProtocolGen = Protocol.Unknown;
+            dcfg.ProtocolId = 0;
+            dcfg.DeviceId = 0;
         }
 
         public string PortName {
@@ -40,21 +68,21 @@ namespace Edlink.Device {
             }
         }
         public byte DeviceID {
-            get { return device_id; }
+            get { return dcfg.DeviceId; }
             set {
                 if (cfg_locked) {
                     throw new Exception("device id cannot be changed");
                 }
-                device_id = value;
+                dcfg.DeviceId = value;
             }
         }
         public byte ProtocolID {
-            get { return protocol_id; }
+            get { return dcfg.ProtocolId; }
             set {
                 if (cfg_locked) {
                     throw new Exception("protocol id cannot be changed");
                 }
-                protocol_id = value;
+                dcfg.ProtocolId = value;
             }
         }
 
@@ -94,7 +122,7 @@ namespace Edlink.Device {
             if (target_port != null) {
                 ports = new string[] { target_port };
             } else {
-                ports = getPorts();
+                ports = GetPorts();
             }
 
             for (int i = 0; i < ports.Length; i++) {
@@ -111,7 +139,7 @@ namespace Edlink.Device {
         }
 
         public void Close() {
-            
+
             try {
                 port.Close();
             } catch (Exception) { }
@@ -262,7 +290,20 @@ namespace Edlink.Device {
                 return false;
             }
         }
-        public static string GetPath(string path) {
+
+        public static string MakeDevPath(string path) {
+
+            if (IsDevPath(path)) {
+                return path;
+            } else {
+                if (path.StartsWith("/")) {
+                    path = path.Substring(1);
+                }
+                return "sd:" + path;
+            }
+        }
+
+        public static string GetDevPath(string path) {
 
             if (IsDevPath(path)) {
                 return path.Substring(3);
@@ -333,7 +374,7 @@ namespace Edlink.Device {
                 port.Open();
                 txData(new byte[64 + 2]);
                 FlushPort();
-                getID();
+                GetID();
                 port.ReadTimeout = 2000;
                 port.WriteTimeout = 2000;
                 return;
@@ -347,6 +388,80 @@ namespace Edlink.Device {
             port = null;
 
             throw new Exception("EverDrive not found");
+        }
+
+        public byte[] GetID() {
+
+            return GetID(0);
+        }
+
+        public byte[] GetID(int timeout_ms) {
+
+            byte[] id = new byte[4];
+            DeviceConfig cfg;
+
+            if (dcfg.ProtocolGen == Protocol.Unknown) {
+                cfg = GetDeviceConfig();
+            } else {
+                cfg = dcfg;
+            }
+
+            txCMD(CMD_STATUS);
+
+            if (timeout_ms != 0) {
+
+                var sw = Stopwatch.StartNew();
+
+                while (BytesToRead < 2) {
+                    if (sw.ElapsedMilliseconds > timeout_ms) {
+                        throw new Exception("link status timeout");
+                    }
+                }
+            }
+
+            if (cfg.ProtocolGen == Protocol.Gen3) {
+                rxData(id, 0, id.Length);
+            } else {
+
+                //transform legacy status resp to Gen3
+                if (cfg.ProtocolId == PROTOCOL_ID_N8) {
+                    id[3] = rx8();
+                    id[0] = rx8();
+                } else {
+                    id[0] = rx8();
+                    id[3] = rx8();
+                }
+
+                if (id[0] != STATUS_KEY_OLD) {
+                    throw new Exception("Ivalid status key");
+                }
+
+                id[0] = STATUS_KEY;
+                id[1] = cfg.ProtocolId;
+                id[2] = cfg.DeviceId;
+            }
+
+            byte target_protocol = dcfg.ProtocolId == 0 ? cfg.ProtocolId : dcfg.ProtocolId;
+            byte target_device = dcfg.DeviceId == 0 ? cfg.DeviceId : dcfg.DeviceId;
+
+
+            if (id[0] != STATUS_KEY) {
+                throw new Exception("Ivalid status key");
+            }
+
+            if (id[1] != target_protocol) {
+                throw new Exception("Ivalid protocol id");
+            }
+
+            if (id[2] != target_device) {
+                throw new Exception("Ivalid device id");
+            }
+
+            if (dcfg.ProtocolGen == Protocol.Unknown) {
+                dcfg = cfg;
+            }
+
+            return id;
         }
 
         void PortBlkCheck(string pname) {
@@ -366,7 +481,7 @@ namespace Edlink.Device {
                 return;
             }
 
-            string[] ports = getPorts();
+            string[] ports = GetPorts();
 
             port_blk = new string[ports.Length];
 
@@ -379,7 +494,7 @@ namespace Edlink.Device {
             }
         }
 
-        string [] getPorts() {
+        string[] GetPorts() {
 
             string[] ports = SerialPort.GetPortNames();
             string[] unique = ports.Distinct().ToArray();
@@ -387,47 +502,51 @@ namespace Edlink.Device {
             return unique;
         }
 
-        void getID() {
+        DeviceConfig GetDeviceConfig() {
 
-            byte protocol_id = this.protocol_id;
-            byte device_id = this.device_id;
+            DeviceConfig cfg;
 
-            bool legacy_mode = protocol_id == 0x05 || protocol_id == 0x06;//n8 or mega
+            byte[] id = new byte[4];
 
-            if (protocol_id == 0 || legacy_mode) {
-                txCMD(CMD_STATUS2);
+            txCMD(CMD_STATUS2);
+            txCMD(CMD_STATUS);
+
+            rxData(id, 0, 2);
+
+
+            if (id[0] == STATUS_KEY) {
+
+                //new status cmd. not supported by old firmware (and bootladers)
+                rxData(id, 2, 2);//remain CMD_STATUS2 status bytes
+
+                if (id[1] == PROTOCOL_ID_MEGA || id[1] == PROTOCOL_ID_N8) {
+                    rxData(2);//remain CMD_STATUS status bytes
+                    cfg.ProtocolGen = Protocol.Gen2;
+                } else {
+                    cfg.ProtocolGen = Protocol.Gen3;
+                }
+
+                cfg.ProtocolId = id[1];
+                cfg.DeviceId = id[2];
+
+            } else
+             if (id[0] == STATUS_KEY_OLD) {
+                //legacy status cmd. early MEGA
+                cfg.ProtocolGen = Protocol.Gen1;
+                cfg.ProtocolId = PROTOCOL_ID_MEGA;
+                cfg.DeviceId = DEVICE_ID_MEGA_PRO;
+            } else
+            if (id[1] == STATUS_KEY_OLD) {
+                //legacy status cmd. early N8
+                cfg.ProtocolGen = Protocol.Gen1;
+                cfg.ProtocolId = PROTOCOL_ID_N8;
+                cfg.DeviceId = DEVICE_ID_N8_PRO;
+            } else {
+                throw new Exception("unexpected status key (" + id[0].ToString("X2") + ")");
             }
-            if (protocol_id == 0 || !legacy_mode) {
-                txCMD(CMD_STATUS);
-            }
-
-            byte[] id = rxData(4);
-            Thread.Sleep(5);
-            FlushPort();
-
-            if (protocol_id == 0) {
-                protocol_id = id[1];
-            }
-
-            if (device_id == 0) {
-                device_id = id[2];
-            }
-
-            if (id[0] != STATUS_KEY) {
-                throw new Exception("Ivalid status key");
-            }
 
 
-            if (id[1] != protocol_id) {
-                throw new Exception("Ivalid protocol id");
-            }
-
-            if (id[2] != device_id) {
-                throw new Exception("Ivalid device id");
-            }
-
-            this.protocol_id = protocol_id;
-            this.device_id = device_id;
+            return cfg;
         }
 
     }
