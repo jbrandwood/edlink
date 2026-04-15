@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Edlink.EDMEGA {
 
@@ -25,6 +26,7 @@ namespace Edlink.EDMEGA {
         public const byte HOST_RST_OFF = 0;
         public const byte HOST_RST_SOFT = 1;
         public const byte HOST_RST_HARD = 2;
+
 
         int rst_state;
 
@@ -50,7 +52,7 @@ namespace Edlink.EDMEGA {
             rst_state = rst;
         }
 
-        internal void configReset() {
+        internal void ConfigReset() {
 
             byte[] buff = new byte[256];
             MemWR(ADDR_FCI_CFG, buff, 0, buff.Length);
@@ -62,7 +64,45 @@ namespace Edlink.EDMEGA {
                 hostReset(HOST_RST_OFF);
             }
         }
-    }
 
-    
+        internal SysInfo getSysInf() {
+
+            SysInfo inf;
+
+            byte[] buff = base.GetSysInf();
+
+            int ptr = 20;
+
+            inf.serial_g = (UInt32)Link.num32(buff, ptr);
+            ptr += 4;
+            inf.serial_l = (UInt32)Link.num32(buff, ptr);
+            ptr += 4;
+            inf.boot_ctr = (UInt32)Link.num32(buff, ptr);
+            ptr += 4;
+            inf.game_ctr = (UInt32)Link.num32(buff, ptr);
+            ptr += 4;
+
+            inf.asm_date = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.asm_time = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.sw_date = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.sw_time = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.sw_ver = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.hw_ver = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.boot_ver = Link.num16(buff, ptr);
+            ptr += 2;
+
+            inf.device_id = buff[ptr++];
+
+            inf.flash_size = 1 << buff[64 - 6];
+
+            return inf;
+        }
+
+    }
 }

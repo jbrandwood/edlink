@@ -37,10 +37,10 @@ namespace Edlink {
             CliHandler cmd = null;           
 
             /*
-            cmd = new CliHandler(args);
-            cmd.Start();
-            cmd.Stop();
-            cmd = null;
+            Cmd = new CliHandler(args);
+            Cmd.Start();
+            Cmd.Stop();
+            Cmd = null;
             return;*/
 
             try {

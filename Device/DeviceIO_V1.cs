@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -8,9 +9,8 @@ using System.Threading.Tasks;
 
 namespace Edlink.Device {
 
-    abstract class DeviceIO_V1 : IDeviceIO {
+    abstract class DeviceIO_V1 : DeviceIO {
 
-        const byte STATUS_KEY = 0x5A;
 
         protected abstract int ADDR_FCI_FIFO { get; } //host fifo
         protected abstract int ADDR_FLA_ICOR { get; } //mcu firmware update
@@ -70,23 +70,40 @@ namespace Edlink.Device {
 
         const byte CMD_USB_RECOV = 0xF0;
         const byte CMD_RUN_APP = 0xF1;
-        //************************************************* FS flags
-        public const byte FA_READ = 0x01;
-        public const byte FA_WRITE = 0x02;
-        public const byte FA_OPEN_EXISTING = 0x00;
-        public const byte FA_CREATE_NEW = 0x04;
-        public const byte FA_CREATE_ALWAYS = 0x08;
-        public const byte FA_OPEN_ALWAYS = 0x10;
-        public const byte FA_OPEN_APPEND = 0x30;
-        public const byte FS_MAKEPATH = 0x80; //make path if not exists
-        //************************************************* FS flags
+
+
+        public struct SysInfo {
+
+            public UInt32 serial_g;
+            public UInt32 serial_l;
+            public UInt32 boot_ctr;
+            public UInt32 game_ctr;
+
+            public UInt16 asm_date;
+            public UInt16 asm_time;
+            public UInt16 sw_date;
+            public UInt16 sw_time;
+            public UInt16 sw_ver;
+            public UInt16 hw_ver;
+            public UInt16 boot_ver;
+            public byte device_id;
+            public int flash_size;
+        }
+
+        public struct Vdc {
+
+            public UInt16 v50;
+            public UInt16 v25;
+            public UInt16 v12;
+            public UInt16 bat;
+        }
 
         protected Link link;
 
-        public Link Link {
+        public override Link Link {
             get { return link; }
         }
-        public void ExitServiceMode() {
+        public override void ExitServiceMode() {
 
             if (!IsServiceMode()) {
                 return;
@@ -100,7 +117,7 @@ namespace Edlink.Device {
             }
         }
 
-        public void EnterServiceMode() {
+        public override void EnterServiceMode() {
 
             if (IsServiceMode()) {
                 return;
@@ -116,7 +133,7 @@ namespace Edlink.Device {
             }
         }
 
-        public void MemWR(int addr, byte[] buff, int offset, int len) {
+        public override void MemWR(int addr, byte[] buff, int offset, int len) {
 
             if (len == 0) {
                 return;
@@ -128,7 +145,7 @@ namespace Edlink.Device {
             link.tx8(0);//exec
             link.txData(buff, offset, len);
         }
-        public void MemRD(int addr, byte[] buff, int offset, int len) {
+        public override void MemRD(int addr, byte[] buff, int offset, int len) {
 
             if (len == 0) {
                 return;
@@ -140,7 +157,7 @@ namespace Edlink.Device {
             link.tx8(0);//exec
             link.rxData(buff, offset, len);
         }
-        public void FlaWR(int addr, byte[] buff, int offset, int len) {
+        public override void FlaWR(int addr, byte[] buff, int offset, int len) {
 
             link.txCMD(CMD_FLA_WR);
             link.tx32(addr);
@@ -148,21 +165,31 @@ namespace Edlink.Device {
             link.txDataACK(buff, offset, len);
             CheckStatus();
         }
-        public void FlaRD(int addr, byte[] buff, int offset, int len) {
+        public override void FlaRD(int addr, byte[] buff, int offset, int len) {
 
             link.txCMD(CMD_FLA_RD);
             link.tx32(addr);
             link.tx32(len);
             link.rxData(buff, offset, len);
         }
-        public void FpgInit(byte[] data) {
+        public override void FpgInit(byte[] data) {
 
             link.txCMD(CMD_FPG_USB);
             link.tx32(data.Length);
             link.txDataACK(data, 0, data.Length);
             CheckStatus();
         }
-        public void FileOpen(string path, int mode) {
+
+        public override void FpgInit(string path) {
+
+            FileOpen(path, FA_READ);
+            int size = (int)FileAvailable();
+            link.txCMD(CMD_FPG_SDC);
+            link.tx32(size);
+            link.tx8(0);
+            CheckStatus();
+        }
+        public override void FileOpen(string path, int mode) {
 
             MakePath(path, mode);
 
@@ -171,12 +198,12 @@ namespace Edlink.Device {
             link.txString(path);
             CheckStatus();
         }
-        public void FileClose() {
+        public override void FileClose() {
 
             link.txCMD(CMD_F_FCLOSE);
             CheckStatus();
         }
-        public UInt64 FileAvailable() {
+        public override UInt64 FileAvailable() {
 
             link.txCMD(CMD_F_AVB);
 
@@ -185,7 +212,7 @@ namespace Edlink.Device {
 
             return lo | (hi << 32);
         }
-        public void FileRead(byte[] buff, int offset, int len) {
+        public override void FileRead(byte[] buff, int offset, int len) {
 
             link.txCMD(CMD_F_FRD);
             link.tx32(len);
@@ -204,14 +231,14 @@ namespace Edlink.Device {
                 len -= block;
             }
         }
-        public void FileWrite(byte[] buff, int offset, int len) {
+        public override void FileWrite(byte[] buff, int offset, int len) {
 
             link.txCMD(CMD_F_FWR);
             link.tx32(len);
             link.txDataACK(buff, offset, len);
             CheckStatus();
         }
-        public void RtcSet(DateTime dt) {
+        public override void RtcSet(DateTime dt) {
 
             RtcTime rtc = new RtcTime(dt);
             byte[] vals = rtc.getVals();
@@ -219,7 +246,7 @@ namespace Edlink.Device {
             link.txData(vals, 0, 6);
         }
 
-        public int RtcCal(DateTime dt, byte arg) {
+        public override int RtcCal(DateTime dt, byte arg) {
 
             RtcTime rtc = new RtcTime(dt);
             byte[] vals = rtc.getVals();
@@ -230,7 +257,7 @@ namespace Edlink.Device {
 
             return link.rx32();
         }
-        public void RtcCalSet(int ppm_val) {
+        public override void RtcCalSet(int ppm_val) {
             throw new CmdException(CmdExceptionType.UnknownCmd);
         }
 
@@ -240,6 +267,18 @@ namespace Edlink.Device {
 
             int crc = (data[4] << 0) | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
             UpdExec(ADDR_FLA_ICOR, crc);
+        }
+
+        public Vdc GetVdc() {
+
+            link.txCMD(CMD_GET_VDC);
+
+            Vdc vdc;
+            vdc.v50 = link.rx16();
+            vdc.v25 = link.rx16();
+            vdc.v12 = link.rx16();
+            vdc.bat = link.rx16();
+            return vdc;
         }
         //************************************************************************************************ internal
         internal void FifoWR(string str) {
@@ -259,6 +298,12 @@ namespace Edlink.Device {
             byte[] len = link.num16(bytes.Length);
             FifoWR(len, 0, 2);
             FifoWR(bytes, 0, bytes.Length);
+        }
+        //************************************************************************************************ protected
+        protected byte[] GetSysInf() {
+
+            link.txCMD(CMD_SYS_INF);
+            return link.rxData(64);
         }
         //************************************************************************************************ private
         int GetStatus() {
@@ -368,7 +413,7 @@ namespace Edlink.Device {
             int status = GetStatus(8000);
 
             if (status == 0x88) {
-                throw new Exception("current core matches to recovery copy");
+                throw new Exception("current core matches recovery copy");
             } else if (status != 0) {
                 throw new Exception("recovery error: " + status.ToString("X2"));
             }

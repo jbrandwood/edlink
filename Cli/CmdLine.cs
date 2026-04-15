@@ -19,10 +19,11 @@ namespace Edlink {
                 throw new Exception("cmd line: out of args list");
             }
 
- 
             if (args[offset].StartsWith(Cli.ArgPrefix)) {
                 throw new Exception("cmd line: invalid cmd format '" + args[offset] + "'");
             }
+
+            string last_val = Cli.ArgPrefix;
 
             for (int i = offset; i < args.Length; i++) {
 
@@ -33,9 +34,15 @@ namespace Edlink {
                 }
 
                 if (val.StartsWith(Cli.ArgPrefix) || i == offset) {
-                    //fixed format for arg and cmd names
+                    //fixed format for arg and Cmd names
                     val = val.ToLower().Trim();
                 }
+
+                if (!val.StartsWith(Cli.ArgPrefix) && !last_val.StartsWith(Cli.ArgPrefix)) {
+                    break;
+                }
+
+                last_val = val;
 
                 cmd_args.Add(val);
             }

@@ -31,10 +31,12 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -48,10 +50,11 @@
     <Compile Include="Cli\CmdLine.cs" />
     <Compile Include="Cli\CliHandler.cs" />
     <Compile Include="Device\DeviceCmd.cs" />
+    <Compile Include="Device\DeviceIO.cs" />
     <Compile Include="Device\DeviceIO_V1.cs" />
+    <Compile Include="Device\DeviceIO_V2.cs" />
     <Compile Include="Device\RtcTime.cs" />
     <Compile Include="ED64\DeviceCmd.cs" />
-    <Compile Include="Device\IDeviceIO.cs" />
     <Compile Include="Cli\CliHandlerCmd.cs" />
     <Compile Include="Device\DeviceCmdFacotoy.cs" />
     <Compile Include="ED64\MenuCmd.cs" />
@@ -60,8 +63,15 @@
     <Compile Include="EDMEGA\DeviceCmd.cs" />
     <Compile Include="EDMEGA\DeviceIO.cs" />
     <Compile Include="EDMEGA\MenuCmd.cs" />
+    <Compile Include="EDMEGA\MenuImage.cs" />
+    <Compile Include="EDMEGA\Sprite.cs" />
     <Compile Include="EDN8\DeviceCmd.cs" />
     <Compile Include="EDN8\DeviceIO.cs" />
+    <Compile Include="EDN8\MenuCmd.cs" />
+    <Compile Include="EDN8\MenuImage.cs" />
+    <Compile Include="EDN8\TestMapper.cs" />
+    <Compile Include="EDTURBO\DeviceCmd.cs" />
+    <Compile Include="EDTURBO\DeviceIO.cs" />
     <Compile Include="NtpTime.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -70,5 +80,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

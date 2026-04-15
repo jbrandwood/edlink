@@ -24,10 +24,16 @@ namespace Edlink.EDMEGA {
             int resp;
 
             dev.FifoWR("*t");
-            resp = link.rx8();
+
+
+            try {
+                resp = link.rx8();
+            } catch (Exception) {
+                throw new Exception("mcmd: no response from menu");
+            }
 
             if (resp != 'k') {
-                throw new Exception("unexpected response: " + resp);
+                throw new Exception("mcmd: unexpected response: " + resp.ToString("X2"));
             }
         }
 
@@ -38,7 +44,7 @@ namespace Edlink.EDMEGA {
 
             dev.hostReset(rst_type);//DeviceIO.HOST_RST_SOFT
             Thread.Sleep(10);
-            dev.configReset();
+            dev.ConfigReset();
             dev.hostReset(DeviceIO.HOST_RST_OFF);
 
             var sw = Stopwatch.StartNew();

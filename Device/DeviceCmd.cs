@@ -1,17 +1,16 @@
-﻿using Edlink.ED64;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Edlink.Device {
     internal class DeviceCmd {
 
-        protected IDeviceIO dev;
+        protected DeviceIO dev;
 
         public virtual string DeviceName {
 
@@ -56,12 +55,17 @@ namespace Edlink.Device {
         }
 
         public virtual void FpgaInit(string path) {
-            byte[] buff = File.ReadAllBytes(path);
-            dev.FpgInit(buff);
+
+            if (Link.IsDevPath(path)) {
+                dev.FpgInit(Link.GetDevPath(path));
+            } else {
+                dev.FpgInit(File.ReadAllBytes(path));
+            }
         }
 
         public virtual void FileCopy(string src, string dst) {
 
+            
             byte[] buff;
 
             if (Link.IsDevPath(src)) {
@@ -72,7 +76,6 @@ namespace Edlink.Device {
             } else {
                 buff = File.ReadAllBytes(src);
             }
-
 
             if (Link.IsDevPath(dst)) {
                 dev.FileOpen(Link.GetDevPath(dst), DeviceIO.FA_WRITE | DeviceIO.FA_CREATE_ALWAYS | DeviceIO.FS_MAKEPATH);
@@ -92,12 +95,12 @@ namespace Edlink.Device {
 
         public virtual string RtcCal(int cmd) {
 
-            //cmd-0: set time and abort calibraion
-            //cmd-1: start calibration
-            //cmd-2: finish calibration
-            //cmd-3: get current calibration value
-            //cmd-4: get estimated calibration value
-            //cmd-5: get time deviation in ms
+            //Cmd-0: set time and abort calibraion
+            //Cmd-1: start calibration
+            //Cmd-2: finish calibration
+            //Cmd-3: get current calibration value
+            //Cmd-4: get estimated calibration value
+            //Cmd-5: get time deviation in ms
 
             int resp = 0;
             long delta = NtpTime.GetDeltaTicks();
@@ -157,6 +160,36 @@ namespace Edlink.Device {
 
         public virtual string DevInf() {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
+
+        protected string AppDeploy(string rom_path, string fpga_path) {
+
+            string usb_home;
+            string app_dst;
+
+            if (Link.IsDevPath(rom_path)) {
+
+                usb_home = Path.GetDirectoryName(rom_path);
+                app_dst = rom_path;
+
+            } else {
+
+                usb_home = Link.MakeDevPath("usb-games");
+
+                if (fpga_path != null) {
+                    usb_home += "/" + Path.GetFileName(rom_path) + ".fpgrom";
+                }
+                app_dst = usb_home + "/" + Path.GetFileName(rom_path);
+
+                FileCopy(rom_path, app_dst);
+            }
+
+            if (fpga_path != null) {
+                FileCopy(fpga_path, usb_home + "/mapper" + Path.GetExtension(fpga_path));
+            }
+
+            return app_dst;
         }
 
     }

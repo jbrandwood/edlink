@@ -97,7 +97,6 @@ namespace Edlink {
 
             dcmd.MemWR(addr, buff, offset, len);
 
-
             CmdEnd("ok");
         }
 
@@ -333,6 +332,8 @@ namespace Edlink {
             dcmd.Screen(path);
 
             CmdEnd("ok");
+
+            Console.WriteLine("saved: " + path);
         }
         //************************************************************************************************ 
         void CopyFile(CmdLine cmd, string src, string dst) {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -346,10 +347,19 @@ namespace Edlink.Device {
             return val_out;
         }
 
+
         public byte[] num32(int val) {
 
             return num(val, 4);
         }
+
+        public int num32(byte[] val, int offset) {
+
+            byte[] buff = new byte[4];
+            Array.Copy(val, offset, buff, 0, buff.Length);
+            return num32(buff);
+        }
+
         public int num32(byte[] val) {
 
             return (int)num(val, 4);
@@ -358,6 +368,13 @@ namespace Edlink.Device {
         public byte[] num16(int val) {
 
             return num(val, 2);
+        }
+
+        public UInt16 num16(byte[] val, int offset) {
+
+            byte[] buff = new byte[2];
+            Array.Copy(val, offset, buff, 0, buff.Length);
+            return num16(buff);
         }
 
         public UInt16 num16(byte[] val) {
@@ -516,7 +533,7 @@ namespace Edlink.Device {
 
             if (id[0] == STATUS_KEY) {
 
-                //new status cmd. not supported by old firmware (and bootladers)
+                //new status Cmd. not supported by old firmware (and bootladers)
                 rxData(id, 2, 2);//remain CMD_STATUS2 status bytes
 
                 if (id[1] == PROTOCOL_ID_MEGA || id[1] == PROTOCOL_ID_N8) {
@@ -531,13 +548,13 @@ namespace Edlink.Device {
 
             } else
              if (id[0] == STATUS_KEY_OLD) {
-                //legacy status cmd. early MEGA
+                //legacy status Cmd. early MEGA
                 cfg.ProtocolGen = Protocol.Gen1;
                 cfg.ProtocolId = PROTOCOL_ID_MEGA;
                 cfg.DeviceId = DEVICE_ID_MEGA_PRO;
             } else
             if (id[1] == STATUS_KEY_OLD) {
-                //legacy status cmd. early N8
+                //legacy status Cmd. early N8
                 cfg.ProtocolGen = Protocol.Gen1;
                 cfg.ProtocolId = PROTOCOL_ID_N8;
                 cfg.DeviceId = DEVICE_ID_N8_PRO;

@@ -2,25 +2,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using static Edlink.Device.DeviceIO_V1;
 
-namespace Edlink.EDN8 {
+namespace Edlink.EDTURBO {
     internal class DeviceIO : DeviceIO_V1 {
 
-        public const int PROTOCOL_ID = 0x06;
-        public const int DEV_ID_N8_PRO = 0x17;
+        public const int PROTOCOL_ID = 0x02;
+        public const int DEV_ID_TURBO_PRO = 0x20;
+        public const int DEV_ID_TURBO_CORE = 0x26;
 
         protected override int ADDR_FCI_FIFO => 0x1810000;
-        protected override int ADDR_FLA_ICOR => 0x80000;
+        protected override int ADDR_FLA_ICOR => 0x00000;
+
+        const byte CMD_HOST_RST = 0x29;
 
         const int ADDR_FCI_CFG = 0x1800000;
 
-        const int ADDR_FCI_PRG = 0x0000000;
-        const int ADDR_FCI_CHR = 0x0800000;
-        public const int ADDR_FCI_MENU_PRG = (ADDR_FCI_PRG + 0x7E0000);
-        public const int ADDR_FCI_MENU_CHR = (ADDR_FCI_CHR + 0x7E0000);
+
+
+        int rst_state;
 
         public DeviceIO(Link link) {
 
@@ -32,22 +35,30 @@ namespace Edlink.EDN8 {
             link.SwapEndians = false;
         }
 
-        public override UInt64 FileAvailable() {
+        /*
+        internal void hostReset(byte rst) {
 
-            UInt64 size = base.FileAvailable();
-            UInt64 hi = size & 0xffffffff;
-            UInt64 lo = size >> 32;
-            return lo | (hi << 32);
+            if (rst_state == HOST_RST_OFF && rst != HOST_RST_OFF) {
+                Thread.Sleep(50);
+            }
+
+            link.txCMD(CMD_HOST_RST);
+            link.tx8(rst);
+
+            rst_state = rst;
         }
 
-        public override void FpgInit(byte[] data) {
-            base.FpgInit(data);
-            ConfigReset();
+        internal void ConfigReset() {
+
+            byte[] buff = new byte[256];
+            MemWR(ADDR_FCI_CFG, buff, 0, buff.Length);
         }
 
-        public override void FpgInit(string path) {
-            base.FpgInit(path);
-            ConfigReset();
+        internal void Stop() {
+
+            if (rst_state != HOST_RST_OFF) {
+                hostReset(HOST_RST_OFF);
+            }
         }
 
         internal SysInfo getSysInf() {
@@ -71,6 +82,10 @@ namespace Edlink.EDN8 {
             ptr += 2;
             inf.asm_time = Link.num16(buff, ptr);
             ptr += 2;
+            inf.sw_date = Link.num16(buff, ptr);
+            ptr += 2;
+            inf.sw_time = Link.num16(buff, ptr);
+            ptr += 2;
             inf.sw_ver = Link.num16(buff, ptr);
             ptr += 2;
             inf.hw_ver = Link.num16(buff, ptr);
@@ -80,26 +95,9 @@ namespace Edlink.EDN8 {
 
             inf.device_id = buff[ptr++];
 
-            ptr = 64 - 9;
-            inf.flash_size = 1 << buff[ptr++];
-
-            inf.sw_date = Link.num16(buff, ptr);
-            ptr += 2;
-            inf.sw_time = Link.num16(buff, ptr);
-            ptr += 2;
-
+            inf.flash_size = 1 << buff[64 - 6];
 
             return inf;
-        }
-
-        void ConfigReset() {
-
-            int cfg_base = 32;
-            byte[] cfg = new byte[cfg_base + 16];
-            cfg[cfg_base + 7] = 0x80;//ctrl
-            cfg[cfg_base + 0] = 0xff;//mapper
-
-            MemWR(ADDR_FCI_CFG, cfg, 0, cfg.Length);
-        }
+        }*/
     }
 }
