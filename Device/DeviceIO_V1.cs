@@ -257,14 +257,18 @@ namespace Edlink.Device {
 
             return link.rx32();
         }
+
         public override void RtcCalSet(int ppm_val) {
             throw new CmdException(CmdExceptionType.UnknownCmd);
         }
 
         public void McuAppLoad(byte[] data) {
 
-            FlaWR(ADDR_FLA_ICOR, data, 0, data.Length);
+            if (data.Length > 0x40000) {
+                throw new Exception("mcu app file size exceeds limit");
+            }
 
+            FlaWR(ADDR_FLA_ICOR, data, 0, data.Length);
             int crc = (data[4] << 0) | (data[5] << 8) | (data[6] << 16) | (data[7] << 24);
             UpdExec(ADDR_FLA_ICOR, crc);
         }

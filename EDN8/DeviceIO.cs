@@ -22,6 +22,11 @@ namespace Edlink.EDN8 {
         public const int ADDR_FCI_MENU_PRG = (ADDR_FCI_PRG + 0x7E0000);
         public const int ADDR_FCI_MENU_CHR = (ADDR_FCI_CHR + 0x7E0000);
 
+        public enum CartForm {
+            NES,
+            FAMICOM,
+        };
+
         public DeviceIO(Link link) {
 
             if (link.ProtocolID != PROTOCOL_ID) {
@@ -90,6 +95,13 @@ namespace Edlink.EDN8 {
 
 
             return inf;
+        }
+
+        internal CartForm getCartForm() {
+
+            byte[] buff = base.GetSysInf();
+
+            return (CartForm)buff[64 - 12];
         }
 
         void ConfigReset() {

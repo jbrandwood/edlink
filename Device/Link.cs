@@ -387,7 +387,7 @@ namespace Edlink.Device {
                 port = new SerialPort(pname);
                 port.ReadTimeout = 200;
                 port.WriteTimeout = 200;
-                //port.BaudRate = 921600;
+                port.BaudRate = 921600;
                 port.Open();
                 txData(new byte[64 + 2]);
                 FlushPort();

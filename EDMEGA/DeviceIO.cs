@@ -38,16 +38,17 @@ namespace Edlink.EDMEGA {
 
             this.link = link;
             link.SwapEndians = true;
+            rst_state = HOST_RST_OFF;
         }
 
         internal void hostReset(byte rst) {
 
+            link.txCMD(CMD_HOST_RST);
+            link.tx8(rst);
+
             if (rst_state == HOST_RST_OFF && rst != HOST_RST_OFF) {
                 Thread.Sleep(50);
             }
-
-            link.txCMD(CMD_HOST_RST);
-            link.tx8(rst);
 
             rst_state = rst;
         }

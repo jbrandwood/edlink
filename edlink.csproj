@@ -72,6 +72,8 @@
     <Compile Include="EDN8\TestMapper.cs" />
     <Compile Include="EDTURBO\DeviceCmd.cs" />
     <Compile Include="EDTURBO\DeviceIO.cs" />
+    <Compile Include="EDTURBO\MenuCmd.cs" />
+    <Compile Include="EDTURBO\MenuImage.cs" />
     <Compile Include="NtpTime.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -80,6 +82,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="DEV_GBA\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

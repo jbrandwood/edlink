@@ -71,7 +71,6 @@ namespace Edlink.ED64 {
             msg += "device id : " + dev.Link.DeviceID.ToString("X2") + "\n";
             msg += "name      : " + DeviceName + "\n";
             msg += "serial    : " + serial + "\n";
-            msg += "hw version: " + dev.SysGetInf(DeviceIO.SysInf.INFS_HW_VER) + "\n";
             msg += "build date: " + Tools.TsToDate(dev.SysGetInf(DeviceIO.SysInf.INFS_TS_ASM)) + "\n";
             msg += "bootloader: " + Tools.TsToVersion(dev.SysGetInf(DeviceIO.SysInf.INFS_TS_BOOT)) + "\n";
             msg += "firmware  : " + Tools.TsToVersion(dev.SysGetInf(DeviceIO.SysInf.INFS_TS_FW)) + "\n";

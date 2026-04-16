@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -15,7 +16,7 @@ namespace Edlink {
     internal class CliHandlerCmd {
 
         protected DeviceCmd dcmd;
-
+        const ConsoleColor inf_color = ConsoleColor.Green;
 
         protected void McuMode(CmdLine cmd) {
 
@@ -47,7 +48,7 @@ namespace Edlink {
 
             CmdStart(cmd, "memory read...");
 
-            bool print = cmd.HasArg(Cli.ArgOut);
+            bool print = cmd.HasArg(Cli.ArgPrint);
             int addr = cmd.getInt(Cli.ArgAddr);
             int len = cmd.getInt(Cli.ArgLen);
             string path;
@@ -68,8 +69,19 @@ namespace Edlink {
             CmdEnd("ok");
 
             if (print) {
-                for (int i = 0; i < buff.Length; i += 16) {
-                    Console.WriteLine(BitConverter.ToString(buff, i, Math.Min(len, 16)));
+
+                for (int i = 0; i < buff.Length;) {
+
+                    int block = Math.Min(len, 16);
+
+                    string msg_hex = BitConverter.ToString(buff, i, block);
+
+                    string msg_txt = Encoding.UTF8.GetString(buff, i, block);                    
+                    msg_txt = Regex.Replace(msg_txt, @"\p{Cc}", "�");
+
+                    Tools.PrintLine(msg_hex + "  " + msg_txt, inf_color);
+
+                    i += block;
                 }
             }
         }
@@ -218,7 +230,7 @@ namespace Edlink {
             msg = dcmd.RtcCal(arg);
             CmdEnd("ok");
 
-            Tools.PrintLine(msg, ConsoleColor.Green);
+            Tools.PrintLine(msg, inf_color);
         }
 
         protected void McuApp(CmdLine cmd) {
@@ -262,7 +274,7 @@ namespace Edlink {
             long t_ms;
 
             ConsoleColor old_color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = inf_color;
 
             Console.Write("Read....");
             t = DateTime.Now;
@@ -286,7 +298,11 @@ namespace Edlink {
             CmdStart(cmd, "\n");
             string msg = dcmd.DevInf();
 
-            Tools.PrintLine(msg, ConsoleColor.Green);
+            Tools.PrintLine(msg, inf_color);
+
+            if (cmd.HasArg(Cli.ArgFile)) {
+                File.WriteAllText(cmd.getStr(Cli.ArgFile), msg);
+            }
         }
 
         protected void UsbPrint(CmdLine cmd) {
@@ -311,7 +327,7 @@ namespace Edlink {
                 }
 
                 string msg = Encoding.UTF8.GetString(buff);
-                Tools.Print(msg, ConsoleColor.Green);
+                Tools.Print(msg, inf_color);
             }
 
         }

@@ -86,8 +86,8 @@ namespace Edlink.EDN8 {
             msg += "device id : " + dev.Link.DeviceID.ToString("X2") + "\n";
             msg += "name      : " + DeviceName + "\n";
             msg += "serial    : " + serial + "\n";
+            msg += "formfactor: " + dev.getCartForm() + "\n";
 
-            msg += "hw version: " + sys_inf.hw_ver.ToString("X4") + "\n";
             msg += "build date: " + Tools.TsToDate(sys_inf.asm_date) + "\n";
             msg += "bootloader: " + sys_inf.boot_ver.ToString("X4") + "\n";
             msg += "mcu core  : " + Tools.TsToVersion(sys_inf.sw_date) + "\n";

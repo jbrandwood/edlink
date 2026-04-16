@@ -12,7 +12,7 @@ namespace Edlink {
 
         public const string ArgPrefix = "--";
         public const string ArgFile = "--file";
-        public const string ArgOut = "--out";
+        public const string ArgPrint = "--print";
         public const string ArgAddr = "--addr";
         public const string ArgLen = "--len";
         public const string ArgOffset = "--offset";

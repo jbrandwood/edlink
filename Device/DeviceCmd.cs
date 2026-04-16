@@ -65,7 +65,7 @@ namespace Edlink.Device {
 
         public virtual void FileCopy(string src, string dst) {
 
-            
+           
             byte[] buff;
 
             if (Link.IsDevPath(src)) {
@@ -84,6 +84,7 @@ namespace Edlink.Device {
             } else {
                 File.WriteAllBytes(dst, buff);
             }
+            
         }
 
         public virtual void RtcSet() {

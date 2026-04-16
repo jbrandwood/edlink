@@ -21,6 +21,8 @@ namespace Edlink.EDTURBO {
 
         const int ADDR_FCI_CFG = 0x1800000;
 
+        public const byte HOST_RST_OFF = 0;
+        public const byte HOST_RST_ON = 1;
 
 
         int rst_state;
@@ -33,20 +35,22 @@ namespace Edlink.EDTURBO {
 
             this.link = link;
             link.SwapEndians = false;
+            rst_state = HOST_RST_OFF;
         }
 
-        /*
+
         internal void hostReset(byte rst) {
+
+            link.txCMD(CMD_HOST_RST);
+            link.tx8(rst);
 
             if (rst_state == HOST_RST_OFF && rst != HOST_RST_OFF) {
                 Thread.Sleep(50);
             }
 
-            link.txCMD(CMD_HOST_RST);
-            link.tx8(rst);
-
             rst_state = rst;
         }
+
 
         internal void ConfigReset() {
 
@@ -98,6 +102,14 @@ namespace Edlink.EDTURBO {
             inf.flash_size = 1 << buff[64 - 6];
 
             return inf;
-        }*/
+        }
+
+        public override void RtcSet(DateTime dt) {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
+        public override int RtcCal(DateTime dt, byte arg) {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
     }
 }

@@ -36,7 +36,7 @@ namespace Edlink.EDN8 {
             }
 
             if (resp != 'k') {
-                throw new Exception("mcmd: unexpected response: " + resp.ToString("X2"));
+                throw new Exception("mcmd: unexpected response: 0x" + resp.ToString("X2"));
             }
         }
 
