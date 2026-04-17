@@ -54,6 +54,13 @@ namespace Edlink.Device {
             dev.FlaRD(addr, buff, offset, len);
         }
 
+        public int UsbRD(byte[] buff, int offset, int len) {
+
+            len = Math.Min(len, dev.Link.BytesToRead);
+            dev.Link.rxData(buff, offset, len);
+            return len;
+        }
+
         public virtual void FpgaInit(string path) {
 
             if (Link.IsDevPath(path)) {
@@ -65,7 +72,7 @@ namespace Edlink.Device {
 
         public virtual void FileCopy(string src, string dst) {
 
-           
+
             byte[] buff;
 
             if (Link.IsDevPath(src)) {
@@ -84,7 +91,7 @@ namespace Edlink.Device {
             } else {
                 File.WriteAllBytes(dst, buff);
             }
-            
+
         }
 
         public virtual void RtcSet() {
@@ -123,12 +130,7 @@ namespace Edlink.Device {
             return msg;
         }
 
-        public byte[] ConsoleRead() {
 
-            byte[] buff = new byte[dev.Link.BytesToRead];
-            dev.Link.rxData(buff, 0, buff.Length);
-            return buff;
-        }
 
 
         public virtual void Reset(string mode) {
@@ -163,6 +165,9 @@ namespace Edlink.Device {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
+        public virtual void Diag() {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
 
         protected string AppDeploy(string rom_path, string fpga_path) {
 

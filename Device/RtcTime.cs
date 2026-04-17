@@ -24,7 +24,7 @@ namespace Edlink.Device {
             hur = data[3];
             min = data[4];
             sec = data[5];
-            dow = data[6];
+            dow = (byte)(data.Length > 6 ? data[6] : 1);
         }
 
         public RtcTime(DateTime dt) {

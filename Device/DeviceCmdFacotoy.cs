@@ -11,14 +11,16 @@ namespace Edlink.Device {
 
             switch (link.ProtocolID) {
 
-                case ED64.DeviceIO.PROTOCOL_ID:
-                    return new ED64.DeviceCmd(link);
-                case EDMEGA.DeviceIO.PROTOCOL_ID:
-                    return new EDMEGA.DeviceCmd(link);
-                case EDN8.DeviceIO.PROTOCOL_ID:
-                    return new EDN8.DeviceCmd(link);
-                case EDTURBO.DeviceIO.PROTOCOL_ID:
-                    return new EDTURBO.DeviceCmd(link);
+                case DEV_ED64.DeviceIO.PROTOCOL_ID:
+                    return new DEV_ED64.DeviceCmd(link);
+                case DEV_MEGA.DeviceIO.PROTOCOL_ID:
+                    return new DEV_MEGA.DeviceCmd(link);
+                case DEV_EDN8.DeviceIO.PROTOCOL_ID:
+                    return new DEV_EDN8.DeviceCmd(link);
+                case DEV_TED.DeviceIO.PROTOCOL_ID:
+                    return new DEV_TED.DeviceCmd(link);
+                case DEV_GBA.DeviceIO.PROTOCOL_ID:
+                    return new DEV_GBA.DeviceCmd(link);
                 default:
                     throw new NotSupportedException("unsupported protocol id: 0x" + link.ProtocolID.ToString("X02"));
             }

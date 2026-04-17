@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Edlink.Device;
 
-namespace Edlink.ED64 {
+namespace Edlink.DEV_ED64 {
     internal class MenuCmd {
 
         internal const int MODE_MENU = 0;

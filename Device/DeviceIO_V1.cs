@@ -19,7 +19,7 @@ namespace Edlink.Device {
 
         const byte CMD_STATUS = 0x10;
         const byte CMD_GET_MODE = 0x11;
-        const byte CMD_IO_RST = 0x12;
+        const byte CMD_RST_MCU = 0x12;
         const byte CMD_GET_VDC = 0x13;
         const byte CMD_RTC_GET = 0x14;
         const byte CMD_RTC_SET = 0x15;
@@ -38,7 +38,7 @@ namespace Edlink.Device {
         const byte CMD_USB_WR = 0x22;
         const byte CMD_FIFO_WR = 0x23;
         const byte CMD_UART_WR = 0x24;
-        const byte CMD_REINIT = 0x25;
+        const byte CMD_RST_EFU = 0x25;
         const byte CMD_SYS_INF = 0x26;
         const byte CMD_GAME_CTR = 0x27;
         const byte CMD_UPD_EXEC = 0x28;
@@ -71,7 +71,11 @@ namespace Edlink.Device {
         const byte CMD_USB_RECOV = 0xF0;
         const byte CMD_RUN_APP = 0xF1;
 
+        const int BMOD_MCU_APP = 0xA0;
+        const int BMOD_MCU_SER = 0xA1;
+        const int BMOD_MCU_UPD = 0xA3;
 
+        const int RTC_SIZE = 6;
         public struct SysInfo {
 
             public UInt32 serial_g;
@@ -98,8 +102,6 @@ namespace Edlink.Device {
             public UInt16 bat;
         }
 
-        protected Link link;
-
         public override Link Link {
             get { return link; }
         }
@@ -123,8 +125,8 @@ namespace Edlink.Device {
                 return;
             }
 
-            link.txCMD(CMD_IO_RST);
-            link.tx8(0);
+            link.txCMD(CMD_RST_MCU);
+            link.tx8(BMOD_MCU_SER);//only gba require ser mode, older carts accept any val
 
             BootWait();
 
@@ -132,6 +134,7 @@ namespace Edlink.Device {
                 throw new Exception("failed to enter service mode");
             }
         }
+
 
         public override void MemWR(int addr, byte[] buff, int offset, int len) {
 
@@ -172,6 +175,12 @@ namespace Edlink.Device {
             link.tx32(len);
             link.rxData(buff, offset, len);
         }
+
+        public override void FifoWR(byte[] data, int offset, int len) {
+
+            MemWR(ADDR_FCI_FIFO, data, offset, len);
+        }
+
         public override void FpgInit(byte[] data) {
 
             link.txCMD(CMD_FPG_USB);
@@ -238,12 +247,20 @@ namespace Edlink.Device {
             link.txDataACK(buff, offset, len);
             CheckStatus();
         }
+
+        public override RtcTime RtcGet() {
+
+            link.txCMD(CMD_RTC_GET);
+            byte[] buff = link.rxData(RTC_SIZE);
+            return new RtcTime(buff);
+        }
+
         public override void RtcSet(DateTime dt) {
 
             RtcTime rtc = new RtcTime(dt);
             byte[] vals = rtc.getVals();
             link.txCMD(CMD_RTC_SET);
-            link.txData(vals, 0, 6);
+            link.txData(vals, 0, RTC_SIZE);
         }
 
         public override int RtcCal(DateTime dt, byte arg) {
@@ -284,25 +301,15 @@ namespace Edlink.Device {
             vdc.bat = link.rx16();
             return vdc;
         }
-        //************************************************************************************************ internal
-        internal void FifoWR(string str) {
 
-            byte[] bytes = Encoding.ASCII.GetBytes(str);
-            FifoWR(bytes, 0, bytes.Length);
+        public void ResetEfu(int tout_sec) {
+
+            link.txCMD(CMD_RST_EFU);
+            link.tx8(0);//ack
+            BootWait(tout_sec);
         }
 
-        internal void FifoWR(byte[] data, int offset, int len) {
 
-            MemWR(ADDR_FCI_FIFO, data, offset, len);
-        }
-
-        internal void FifoTxString(string str) {
-
-            byte[] bytes = Encoding.ASCII.GetBytes(str);
-            byte[] len = link.num16(bytes.Length);
-            FifoWR(len, 0, 2);
-            FifoWR(bytes, 0, bytes.Length);
-        }
         //************************************************************************************************ protected
         protected byte[] GetSysInf() {
 
@@ -310,18 +317,6 @@ namespace Edlink.Device {
             return link.rxData(64);
         }
         //************************************************************************************************ private
-        int GetStatus() {
-            return GetStatus(0);
-        }
-        int GetStatus(int timeout_ms) {
-
-            byte[] resp = link.GetID(timeout_ms);
-
-            if (resp[0] != STATUS_KEY || resp[1] != link.ProtocolID) {
-                throw new Exception("unexpected status response (" + BitConverter.ToString(resp) + ")");
-            }
-            return resp[3];
-        }
 
         void CheckStatus() {
 
@@ -336,40 +331,10 @@ namespace Edlink.Device {
             link.txCMD(CMD_GET_MODE);
             byte resp = link.rx8();
 
-            if (resp == 0xA1) {
+            if (resp == BMOD_MCU_SER) {
                 return true;
             } else {
                 return false;
-            }
-        }
-
-        void BootWait() {
-            BootWait(5);
-        }
-
-        void BootWait(int max_time_sec) {
-
-            var sw = Stopwatch.StartNew();
-
-            Thread.Sleep(100);
-
-            while (true) {
-
-                try {
-                    link.Close();
-                } catch (Exception) { }
-
-
-                try {
-                    Thread.Sleep(100);
-                    link.Open();
-                    return;
-                } catch (Exception) { }
-
-
-                if (sw.ElapsedMilliseconds > max_time_sec * 1000) {
-                    throw new Exception("boot timeout");
-                }
             }
         }
 

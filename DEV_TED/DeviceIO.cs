@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using static Edlink.Device.DeviceIO_V1;
 
-namespace Edlink.EDTURBO {
+namespace Edlink.DEV_TED {
     internal class DeviceIO : DeviceIO_V1 {
 
         public const int PROTOCOL_ID = 0x02;
@@ -16,6 +16,12 @@ namespace Edlink.EDTURBO {
 
         protected override int ADDR_FCI_FIFO => 0x1810000;
         protected override int ADDR_FLA_ICOR => 0x00000;
+
+        public const int ADDR_FCI_RAM1 = 0x0000000;
+        public const int ADDR_FCI_RAM2 = 0x0800000;
+
+        public readonly int SIZE_RAM0 = 0x800000;
+        public readonly int SIZE_RAM1;
 
         const byte CMD_HOST_RST = 0x29;
 
@@ -36,19 +42,31 @@ namespace Edlink.EDTURBO {
             this.link = link;
             link.SwapEndians = false;
             rst_state = HOST_RST_OFF;
+
+            switch (link.DeviceID) {
+                case DEV_ID_TURBO_PRO:
+                    SIZE_RAM1 = 0x800000;
+                    break;
+                case DEV_ID_TURBO_CORE:
+                    SIZE_RAM1 = 0;
+                    break;
+                default:
+                    SIZE_RAM1 = 0;
+                    break;
+            }
         }
 
 
-        internal void hostReset(byte rst) {
+        internal void hostReset(byte mode) {
 
             link.txCMD(CMD_HOST_RST);
-            link.tx8(rst);
+            link.tx8(mode);
 
-            if (rst_state == HOST_RST_OFF && rst != HOST_RST_OFF) {
+            if (rst_state == HOST_RST_OFF && mode != HOST_RST_OFF) {
                 Thread.Sleep(50);
             }
 
-            rst_state = rst;
+            rst_state = mode;
         }
 
 

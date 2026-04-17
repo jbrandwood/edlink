@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edlink.EDN8 {
+namespace Edlink.DEV_EDN8 {
     internal class TestMapper {
 
        

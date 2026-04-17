@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Edlink.Device;
 
-namespace Edlink.ED64 {
+namespace Edlink.DEV_ED64 {
 
     internal class DeviceIO : DeviceIO_V2 {
 

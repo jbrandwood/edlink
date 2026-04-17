@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing;
 
-namespace Edlink.EDMEGA {
+namespace Edlink.DEV_MEGA {
     internal class MenuImage {
 
         const int plan_w = 64;//512/8

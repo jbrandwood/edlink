@@ -11,7 +11,7 @@ using Edlink.Device;
 namespace Edlink {
     internal class CliHandler : CliHandlerCmd {
 
-        
+
         Link link;
         CmdLine[] cmd_list;
 
@@ -171,12 +171,16 @@ namespace Edlink {
                     base.DevInf(cmd);
                     break;
 
-                case Cli.CmdUsbPrint:
-                    base.UsbPrint(cmd);
+                case Cli.CmdUsbRd:
+                    base.UsbRD(cmd);
                     break;
 
                 case Cli.CmdScreen:
                     base.Screen(cmd);
+                    break;
+
+                case Cli.CmdDiag:
+                    base.Diag(cmd);
                     break;
 
                 default:

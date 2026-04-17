@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace Edlink.EDMEGA {
+namespace Edlink.DEV_MEGA {
 
     internal class DeviceIO : DeviceIO_V1 {
 
@@ -21,14 +21,23 @@ namespace Edlink.EDMEGA {
 
         const byte CMD_HOST_RST = 0x29;
 
+        public const int ADDR_PRG1 = 0x0000000;
+        public const int ADDR_PRG2 = 0x0800000;
+        public const int ADDR_SRAM = 0x1000000;
+        public const int ADDR_BRAM = 0x1080000;
+
         const int ADDR_FCI_CFG = 0x1800000;
 
         public const byte HOST_RST_OFF = 0;
         public const byte HOST_RST_SOFT = 1;
         public const byte HOST_RST_HARD = 2;
 
+        public readonly int SIZE_PRG1 = 0x800000;
+        public readonly int SIZE_PRG2;
+        public readonly int SIZE_SRAM;
+        public readonly int SIZE_BRAM;
 
-        int rst_state;
+            int rst_state;
 
         public DeviceIO(Link link) {
 
@@ -39,10 +48,29 @@ namespace Edlink.EDMEGA {
             this.link = link;
             link.SwapEndians = true;
             rst_state = HOST_RST_OFF;
+
+
+            switch (link.DeviceID) {
+                case DEV_ID_MEGA_PRO:
+                    SIZE_PRG2 = 0x800000;
+                    SIZE_SRAM = 0x80000;
+                    SIZE_BRAM = 0x80000;
+                    break;
+                case DEV_ID_MEGA_CORE:
+                    SIZE_PRG2 = 0;
+                    SIZE_SRAM = 0;
+                    SIZE_BRAM = 0x20000;
+                    break;
+                default:
+                    SIZE_PRG2 = 0;
+                    SIZE_SRAM = 0;
+                    SIZE_BRAM = 0;
+                    break;
+            }
         }
 
         internal void hostReset(byte rst) {
-
+            
             link.txCMD(CMD_HOST_RST);
             link.tx8(rst);
 

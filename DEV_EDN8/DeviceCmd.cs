@@ -1,21 +1,18 @@
 ﻿using Edlink.Device;
-using Edlink.ED64;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
-using System.Net.Configuration;
 
-namespace Edlink.EDMEGA {
+namespace Edlink.DEV_EDN8 {
     internal class DeviceCmd : Device.DeviceCmd {
 
         new DeviceIO dev;
         MenuCmd mcmd;
-        //byte default_rst_type = DeviceIO.HOST_RST_SOFT;
-
-        byte rst_mode = DeviceIO.HOST_RST_SOFT;
 
         public DeviceCmd(Link link) {
 
@@ -29,46 +26,31 @@ namespace Edlink.EDMEGA {
 
                 switch (dev.Link.DeviceID) {
 
-                    case DeviceIO.DEV_ID_MEGA_PRO:
-                        return "Mega EverDrive PRO";
-                    case DeviceIO.DEV_ID_MEGA_CORE:
-                        return "Mega EverDrive CORE";
+                    case DeviceIO.DEV_ID_N8_PRO:
+                        return "EverDrive-N8 PRO";
                     default:
-                        return "Uknown Mega EverDrive";
+                        return "Uknown EverDrive-N8";
                 }
             }
         }
 
-        public override void Stop() {
-            dev.Stop();
-        }
 
         public override void Reset(string mode) {
 
-            mode = mode.ToLower().Trim();
-
-            if (mode.Equals("hard")) {
-                rst_mode = DeviceIO.HOST_RST_HARD;
-            } else
-            if (mode.Equals("soft")) {
-                rst_mode = DeviceIO.HOST_RST_SOFT;
-            } else
-            if (mode.Equals("off")) {
-                dev.hostReset(DeviceIO.HOST_RST_OFF);
-                return;
-            }
-
-            dev.hostReset(rst_mode);
+            mcmd.Test();
+            mcmd.Reset();
         }
 
         public override void Run(string rom_path, string fpga_path) {
 
+
             string app_dst;
 
-            mcmd.ResetToMenu(rst_mode);
+            mcmd.Test();
             app_dst = base.AppDeploy(rom_path, fpga_path);
             mcmd.AppInstall(Link.GetDevPath(app_dst));
             mcmd.AppStart();
+
         }
 
         public override void McuApp(string path) {
@@ -79,11 +61,14 @@ namespace Edlink.EDMEGA {
 
         public override void Screen(string path) {
 
-            byte[] vram = new byte[0x10000];
-            byte[] palette = new byte[128];
+            byte[] vram = new byte[2048];
+            byte[] palette = new byte[16];
+            byte[] chr = new byte[8192];
 
             mcmd.VramDump(vram, palette);
-            MenuImage.makeImage(path, vram, palette);
+            MemRD(DeviceIO.ADDR_FCI_MENU_CHR, chr, 0, chr.Length);
+
+            MenuImage.makeImage(path, chr, vram, palette);
         }
 
         public override string DevInf() {
@@ -101,6 +86,7 @@ namespace Edlink.EDMEGA {
             msg += "device id : " + dev.Link.DeviceID.ToString("X2") + "\n";
             msg += "name      : " + DeviceName + "\n";
             msg += "serial    : " + serial + "\n";
+            msg += "formfactor: " + dev.getCartForm() + "\n";
 
             msg += "build date: " + Tools.TsToDate(sys_inf.asm_date) + "\n";
             msg += "bootloader: " + sys_inf.boot_ver.ToString("X4") + "\n";
@@ -116,5 +102,11 @@ namespace Edlink.EDMEGA {
 
             return msg;
         }
+
+        public override void Diag() {
+            Diagnostics diag = new Diagnostics(dev);
+            diag.Start();
+        }
+
     }
 }

@@ -1,17 +1,21 @@
 ﻿using Edlink.Device;
+using Edlink.DEV_ED64;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using System.Net.Configuration;
 
-namespace Edlink.EDTURBO {
+namespace Edlink.DEV_MEGA {
     internal class DeviceCmd : Device.DeviceCmd {
 
         new DeviceIO dev;
         MenuCmd mcmd;
+        //byte default_rst_type = DeviceIO.HOST_RST_SOFT;
+
+        byte rst_mode = DeviceIO.HOST_RST_SOFT;
 
         public DeviceCmd(Link link) {
 
@@ -25,18 +29,17 @@ namespace Edlink.EDTURBO {
 
                 switch (dev.Link.DeviceID) {
 
-                    case DeviceIO.DEV_ID_TURBO_PRO:
-                        return "Turbo EverDrive PRO";
-                    case DeviceIO.DEV_ID_TURBO_CORE:
-                        return "Turbo EverDrive CORE";
+                    case DeviceIO.DEV_ID_MEGA_PRO:
+                        return "Mega EverDrive PRO";
+                    case DeviceIO.DEV_ID_MEGA_CORE:
+                        return "Mega EverDrive CORE";
                     default:
-                        return "Uknown Turbo EverDrive";
+                        return "Uknown Mega EverDrive";
                 }
             }
         }
 
         public override void Stop() {
-
             dev.Stop();
         }
 
@@ -44,18 +47,25 @@ namespace Edlink.EDTURBO {
 
             mode = mode.ToLower().Trim();
 
+            if (mode.Equals("hard")) {
+                rst_mode = DeviceIO.HOST_RST_HARD;
+            } else
+            if (mode.Equals("soft")) {
+                rst_mode = DeviceIO.HOST_RST_SOFT;
+            } else
             if (mode.Equals("off")) {
                 dev.hostReset(DeviceIO.HOST_RST_OFF);
-            } else {
-                dev.hostReset(DeviceIO.HOST_RST_ON);
+                return;
             }
+
+            dev.hostReset(rst_mode);
         }
 
         public override void Run(string rom_path, string fpga_path) {
 
             string app_dst;
 
-            mcmd.ResetToMenu();
+            mcmd.ResetToMenu(rst_mode);
             app_dst = base.AppDeploy(rom_path, fpga_path);
             mcmd.AppInstall(Link.GetDevPath(app_dst));
             mcmd.AppStart();
@@ -67,11 +77,10 @@ namespace Edlink.EDTURBO {
             dev.McuAppLoad(buff);
         }
 
-
         public override void Screen(string path) {
 
             byte[] vram = new byte[0x10000];
-            byte[] palette = new byte[1024];
+            byte[] palette = new byte[128];
 
             mcmd.VramDump(vram, palette);
             MenuImage.makeImage(path, vram, palette);
@@ -96,11 +105,11 @@ namespace Edlink.EDTURBO {
             msg += "build date: " + Tools.TsToDate(sys_inf.asm_date) + "\n";
             msg += "bootloader: " + sys_inf.boot_ver.ToString("X4") + "\n";
             msg += "mcu core  : " + Tools.TsToVersion(sys_inf.sw_date) + "\n";
-            //msg += "flash size: " + Tools.SizeToStr(sys_inf.flash_size) + "\n";
-            //msg += "rtc calib : " + dev.RtcCal(DateTime.Now, (byte)DeviceIO.Rtcc.GET_CURCAL) + "\n";
+            msg += "flash size: " + Tools.SizeToStr(sys_inf.flash_size) + "\n";
+            msg += "rtc calib : " + dev.RtcCal(DateTime.Now, (byte)DeviceIO.Rtcc.GET_CURCAL) + "\n";
             msg += "game ctr  : " + sys_inf.game_ctr + "\n";
             msg += "boot ctr  : " + sys_inf.boot_ctr + "\n";
-            //msg += "battery   : " + Tools.VdcToStr(vdc.bat) + "\n";
+            msg += "battery   : " + Tools.VdcToStr(vdc.bat) + "\n";
             msg += "vcc 5.0   : " + Tools.VdcToStr(vdc.v50) + "\n";
             msg += "vcc 2.5   : " + Tools.VdcToStr(vdc.v25) + "\n";
             msg += "vcc 1.2   : " + Tools.VdcToStr(vdc.v12) + "\n";
@@ -108,5 +117,10 @@ namespace Edlink.EDTURBO {
             return msg;
         }
 
+        public override void Diag() {
+
+            Diagnostics diag = new Diagnostics(dev);
+            diag.Start();
+        }
     }
 }

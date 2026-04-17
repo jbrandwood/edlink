@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edlink.EDTURBO {
+namespace Edlink.DEV_TED {
     internal class MenuImage {
 
         const int plan_w = 64;//512/8

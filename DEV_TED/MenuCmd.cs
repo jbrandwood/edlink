@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Edlink.EDTURBO {
+namespace Edlink.DEV_TED {
     internal class MenuCmd {
 
         DeviceIO dev;

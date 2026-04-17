@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Edlink.Device {
@@ -31,6 +33,8 @@ namespace Edlink.Device {
             MCO_ON,
         }
 
+        protected Link link;
+
         public abstract Link Link { get; }
         public abstract void ExitServiceMode();
         public abstract void EnterServiceMode();
@@ -38,6 +42,7 @@ namespace Edlink.Device {
         public abstract void MemRD(int addr, byte[] buff, int offset, int len);
         public abstract void FlaWR(int addr, byte[] buff, int offset, int len);
         public abstract void FlaRD(int addr, byte[] buff, int offset, int len);
+        public abstract void FifoWR(byte[] data, int offset, int len);
         public abstract void FpgInit(byte[] data);
         public abstract void FpgInit(string path);
         public abstract void FileOpen(string path, int mode);
@@ -45,8 +50,70 @@ namespace Edlink.Device {
         public abstract UInt64 FileAvailable();
         public abstract void FileRead(byte[] buff, int offset, int len);
         public abstract void FileWrite(byte[] buff, int offset, int len);
+        public abstract RtcTime RtcGet();
         public abstract void RtcSet(DateTime dt);
         public abstract int RtcCal(DateTime dt, byte arg);
         public abstract void RtcCalSet(int ppm_val);
+
+
+
+        public void FifoWR(string str) {
+
+            byte[] bytes = Encoding.ASCII.GetBytes(str);
+            FifoWR(bytes, 0, bytes.Length);
+        }
+
+        public void FifoTxString(string str) {
+
+            byte[] bytes = Encoding.ASCII.GetBytes(str);
+            byte[] len = link.num16(bytes.Length);
+            FifoWR(len, 0, 2);
+            FifoWR(bytes, 0, bytes.Length);
+        }
+
+
+        protected int GetStatus() {
+            return GetStatus(0);
+        }
+
+        protected int GetStatus(int timeout_ms) {
+
+            byte[] resp = link.GetID(timeout_ms);
+
+            if (resp[0] != STATUS_KEY || resp[1] != link.ProtocolID) {
+                throw new Exception("unexpected status response (" + BitConverter.ToString(resp) + ")");
+            }
+            return resp[3];
+        }
+
+        protected void BootWait() {
+            BootWait(5);
+        }
+
+        protected void BootWait(int max_time_sec) {
+
+            var sw = Stopwatch.StartNew();
+
+            Thread.Sleep(100);
+
+            while (true) {
+
+                try {
+                    link.Close();
+                } catch (Exception) { }
+
+
+                try {
+                    Thread.Sleep(100);
+                    link.Open();
+                    return;
+                } catch (Exception) { }
+
+
+                if (sw.ElapsedMilliseconds > max_time_sec * 1000) {
+                    throw new Exception("boot timeout");
+                }
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edlink.EDN8 {
+namespace Edlink.DEV_EDN8 {
     internal class MenuImage {
 
         static byte[] pal_nes = new byte[]

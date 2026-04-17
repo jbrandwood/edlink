@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edlink.EDN8 {
+namespace Edlink.DEV_EDN8 {
     internal class DeviceIO : DeviceIO_V1 {
 
         public const int PROTOCOL_ID = 0x06;
@@ -17,10 +17,16 @@ namespace Edlink.EDN8 {
 
         const int ADDR_FCI_CFG = 0x1800000;
 
-        const int ADDR_FCI_PRG = 0x0000000;
-        const int ADDR_FCI_CHR = 0x0800000;
+        public const int ADDR_FCI_PRG = 0x0000000;
+        public const int ADDR_FCI_CHR = 0x0800000;
+        public const int ADDR_FCI_SRM = 0x1000000;
+
         public const int ADDR_FCI_MENU_PRG = (ADDR_FCI_PRG + 0x7E0000);
         public const int ADDR_FCI_MENU_CHR = (ADDR_FCI_CHR + 0x7E0000);
+
+        public readonly int SIZE_PRG = 0x800000;
+        public readonly int SIZE_CHR = 0x800000;
+        public readonly int SIZE_SRM = 0x40000;
 
         public enum CartForm {
             NES,

@@ -42,8 +42,8 @@ namespace Edlink {
         public const string CmdMcuApp = "mcuapp";
         public const string CmdUsbSpd = "usbspd";
         public const string CmdDevInf = "devinf";
-        public const string CmdScreen = "screen";//
-        public const string CmdUsbPrint = "usbprint";
+        public const string CmdScreen = "screen";
+        public const string CmdUsbRd = "usbrd";
         public const string CmdDiag = "diag";//
         public const string CmdNetGame = "netgate";//
 

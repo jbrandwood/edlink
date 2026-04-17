@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.IO;
 using Edlink.Device;
 
-namespace Edlink.ED64 {
+namespace Edlink.DEV_ED64 {
 
     internal class DeviceCmd : Device.DeviceCmd {
 

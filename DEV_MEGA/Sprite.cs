@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Edlink.EDMEGA {
+namespace Edlink.DEV_MEGA {
     internal class Sprite {
 
         int spr_x;

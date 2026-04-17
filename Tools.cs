@@ -32,7 +32,7 @@ namespace Edlink {
 
         public static string TsToVersion(int ts) {
 
-            UInt32 ver = tsToVersion((UInt32)ts);
+            UInt32 ver = TsToVersion((UInt32)ts);
             string msg = "";
 
             msg += ((ver >> 16) & 0xff).ToString("X2");
@@ -40,6 +40,20 @@ namespace Edlink {
             msg += (ver & 0xffff).ToString("X4");
 
             return msg;
+        }
+
+        static UInt32 TsToVersion(UInt32 ts) {
+
+            UInt32 ver = 0;
+            UInt32 date = ts & 0xffff;
+
+
+            ver |= ByteToBcd((date >> 9) - 20) << 8;
+            ver <<= 8;
+            ver |= ByteToBcd((date >> 5) & 15) << 8;
+            ver |= ByteToBcd(date & 31);
+
+            return ver;
         }
 
         public static string SizeToStr(int size) {
@@ -59,7 +73,8 @@ namespace Edlink {
 
         public static void PrintLine(string msg, ConsoleColor color) {
 
-            Print(msg + "\n", color);
+            Print(msg, color);
+            Console.WriteLine();
         }
 
         public static void Print(string msg, ConsoleColor color) {
@@ -79,19 +94,7 @@ namespace Edlink {
             }
             return (val / 10 << 4) | val % 10;
         }
-        static UInt32 tsToVersion(UInt32 ts) {
-
-            UInt32 ver = 0;
-            UInt32 date = ts & 0xffff;
-
-
-            ver |= ByteToBcd((date >> 9) - 20) << 8;
-            ver <<= 8;
-            ver |= ByteToBcd((date >> 5) & 15) << 8;
-            ver |= ByteToBcd(date & 31);
-
-            return ver;
-        }
+        
 
     }
 

@@ -76,8 +76,12 @@ namespace Edlink {
 
                     string msg_hex = BitConverter.ToString(buff, i, block);
 
-                    string msg_txt = Encoding.UTF8.GetString(buff, i, block);                    
-                    msg_txt = Regex.Replace(msg_txt, @"\p{Cc}", "�");
+                    string msg_txt = "";
+
+                    for (int u = 0; u < block; u++) {
+                        byte val = buff[i + u];
+                        msg_txt += val < 32 || val > 126 ? '.' : (char)val;
+                    }
 
                     Tools.PrintLine(msg_hex + "  " + msg_txt, inf_color);
 
@@ -162,6 +166,93 @@ namespace Edlink {
             }
 
             CmdEnd("ok");
+        }
+
+        protected void UsbRD(CmdLine cmd) {
+
+            CmdStart(cmd, "\n");
+
+            FileStream fs = null;
+            bool print;
+            int len = 0;
+            int byte_ctr = 0;
+            int bytes_ctr_old = -1;
+
+            print = cmd.HasArg(Cli.ArgPrint);
+
+            if (cmd.HasArg(Cli.ArgLen)) {
+                len = cmd.getInt(Cli.ArgLen);
+            }
+
+            if (cmd.HasArg(Cli.ArgFile) || !print) {
+                fs = new FileStream(cmd.getStr(Cli.ArgFile), FileMode.Create, FileAccess.Write);
+            }
+
+            if (print) {
+                Console.WriteLine("Press CTRL+Q to exit");
+                Console.WriteLine("Press CTRL+X to clear console");
+            }
+
+            byte[] buff = new byte[1024];
+            int console_base = Console.CursorTop;
+
+            while (true) {
+
+                if (print && Console.KeyAvailable) {
+
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Q && key.Modifiers.HasFlag(ConsoleModifiers.Control)) {
+                        break;
+                    }
+
+                    if (key.Key == ConsoleKey.X && key.Modifiers.HasFlag(ConsoleModifiers.Control)) {
+                        Console.Clear();
+                    }
+                }
+
+                int block = buff.Length;
+                if (len != 0) {
+                    block = Math.Min(block, len);
+                }
+                block = dcmd.UsbRD(buff, 0, block);
+                byte_ctr += block;
+
+                if (!print && byte_ctr != bytes_ctr_old) {
+                    Console.CursorLeft = 0;
+                    Console.CursorTop = console_base;
+                    Tools.Print("bytes recived: " + byte_ctr, inf_color);
+                    bytes_ctr_old = byte_ctr;
+                }
+
+                if (block == 0) {
+                    Thread.Sleep(1);
+                    continue;
+                }
+
+                if (print) {
+                    string msg = Encoding.UTF8.GetString(buff, 0, block);
+                    Tools.Print(msg, inf_color);
+                }
+
+                if (fs != null) {
+                    fs.Write(buff, 0, block);
+                    fs.Flush();
+                }
+
+                if (len != 0) {
+                    len -= block;
+                    if (len <= 0) {
+                        break;
+                    }
+                }
+
+            }
+
+            if (fs != null) {
+                fs.Close();
+            }
+
+            Console.WriteLine();
         }
 
         protected void Reset(CmdLine cmd) {
@@ -305,33 +396,6 @@ namespace Edlink {
             }
         }
 
-        protected void UsbPrint(CmdLine cmd) {
-
-            CmdStart(cmd, "\n");
-
-            Console.WriteLine("Press CTRL+X to exit");
-
-            while (true) {
-
-                if (Console.KeyAvailable) {
-                    var key = Console.ReadKey(true);
-                    if (key.Key == ConsoleKey.X && key.Modifiers.HasFlag(ConsoleModifiers.Control)) {
-                        break;
-                    }
-                }
-
-                byte[] buff = dcmd.ConsoleRead();
-                if (buff.Length == 0) {
-                    Thread.Sleep(1);
-                    continue;
-                }
-
-                string msg = Encoding.UTF8.GetString(buff);
-                Tools.Print(msg, inf_color);
-            }
-
-        }
-
         protected void Screen(CmdLine cmd) {
 
             CmdStart(cmd, "taking screenshot...");
@@ -351,6 +415,16 @@ namespace Edlink {
 
             Console.WriteLine("saved: " + path);
         }
+
+        protected void Diag(CmdLine cmd) {
+
+            CmdStart(cmd, "\n");
+            ConsoleColor old = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            dcmd.Diag();
+            Console.ForegroundColor = old;
+        }
+
         //************************************************************************************************ 
         void CopyFile(CmdLine cmd, string src, string dst) {
 
