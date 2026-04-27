@@ -169,6 +169,10 @@ namespace Edlink.Device {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
+        public virtual void Dscmd(CmdLine cmd) {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
         protected string AppDeploy(string rom_path, string fpga_path) {
 
             string usb_home;

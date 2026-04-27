@@ -23,8 +23,9 @@ namespace Edlink {
         public const string ArgPort = "--port";
         public const string ArgDevId = "--dev-id";
         public const string ArgProtId = "--protocol-id";
-        public const string ArgScmd = "--scmd";
         public const string ArgVal = "--val";
+        public const string ArgCmd = "--cmd";// sub commands
+
 
         public const string CmdLink = ".link";
         public const string CmdRun = "run";
@@ -44,7 +45,8 @@ namespace Edlink {
         public const string CmdDevInf = "devinf";
         public const string CmdScreen = "screen";
         public const string CmdUsbRd = "usbrd";
-        public const string CmdDiag = "diag";//
+        public const string CmdDiag = "diag";
+        public const string CmdDscmd = "dscmd";//       device specific cmd
         public const string CmdNetGame = "netgate";//
 
         //ArgMode

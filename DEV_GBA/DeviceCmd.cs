@@ -55,6 +55,35 @@ namespace Edlink.DEV_GBA {
             MenuImage.makeImage(path, vram, palette, regs);
         }
 
+         public override string DevInf() {
+
+            string msg = "";
+
+            DeviceIO.SysInfo sys_inf = dev.getSysInf();
+            DeviceIO.Vdc vdc = dev.GetVdc();
+
+            string serial = "";
+            serial += sys_inf.serial_g.ToString("X8");
+            serial += ".";
+            serial += sys_inf.serial_l.ToString("X8");
+
+            msg += "device id : " + dev.Link.DeviceID.ToString("X2") + "\n";
+            msg += "name      : " + DeviceName + "\n";
+            msg += "serial    : " + serial + "\n";
+
+            msg += "build date: " + Tools.TsToDate(sys_inf.asm_date) + "\n";
+            msg += "bootloader: " + Tools.TsToVersion(sys_inf.boot_ver) + "\n";
+            msg += "firmware  : " + Tools.TsToVersion(sys_inf.sw_ver) + "\n";
+            msg += "mcu core  : " + Tools.TsToVersion(sys_inf.sw_date) + "\n";
+            msg += "flash size: " + Tools.SizeToStr(sys_inf.flash_size) + "\n";
+            msg += "rtc calib : " + dev.RtcCal(DateTime.Now, (byte)DeviceIO.Rtcc.GET_CURCAL) + "\n";
+            msg += "game ctr  : " + sys_inf.game_ctr + "\n";
+            msg += "boot ctr  : " + sys_inf.boot_ctr + "\n";
+            msg += "battery   : " + Tools.VdcToStr(vdc.bat) + "\n";
+
+            return msg;
+        }
+
         public override void Diag() {
             Diagnostics diag = new Diagnostics(dev);
             diag.Start();

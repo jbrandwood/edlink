@@ -147,7 +147,13 @@ namespace Edlink.Device {
         }
 
         public void FlushPort() {
-            port.ReadExisting();
+
+            //port.ReadExisting(); //(do not work well in linux?)
+            byte[] buff = new byte[port.BytesToRead];
+            while (buff.Length > 0) {
+                port.Read(buff, 0, buff.Length);
+                buff = new byte[port.BytesToRead];
+            }
         }
 
         public void txData(byte[] buff) {

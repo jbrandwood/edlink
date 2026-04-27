@@ -276,7 +276,7 @@ namespace Edlink.Device {
         }
 
         public override void RtcCalSet(int ppm_val) {
-            throw new CmdException(CmdExceptionType.UnknownCmd);
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
         public void McuAppLoad(byte[] data) {

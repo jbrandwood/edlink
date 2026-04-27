@@ -36,7 +36,7 @@ namespace Edlink.DEV_ED64 {
         public override void Reset(string mode) {
 
             mcmd.Test();
-            mcmd.ResetToMenu();   
+            mcmd.ResetToMenu();
         }
 
         public override void Run(string rom_path, string fpga_path) {
@@ -57,6 +57,14 @@ namespace Edlink.DEV_ED64 {
             byte[] buff = File.ReadAllBytes(path);
             dev.ExitServiceMode();
             dev.McuBootInstall(buff);
+        }
+
+        public override void Screen(string path) {
+
+            byte[] vram = new byte[640 * 240 * 2];
+            mcmd.VramDump(vram);
+            MenuImage.makeImage(path, vram);
+
         }
 
         public override string DevInf() {
@@ -87,6 +95,22 @@ namespace Edlink.DEV_ED64 {
 
             return msg;
         }
+
+        public override void Dscmd(CmdLine cmd) {
+
+            string scmd = cmd.getStr(Cli.ArgCmd);
+     
+            switch (scmd) {
+                case "cicupd":
+                    dev.CicUpd(cmd.getStr(Cli.ArgFile));
+                    break;
+                default:
+                    throw new CmdException(CmdExceptionType.UnknownCmd);
+            }
+
+        }
+
+
 
     }
 }

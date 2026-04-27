@@ -316,7 +316,7 @@ namespace Edlink {
 
             CmdStart(cmd, "rtc cal...");
             string msg;
-            int arg = cmd.getInt(Cli.ArgScmd);
+            int arg = cmd.getInt(Cli.ArgCmd);
 
             msg = dcmd.RtcCal(arg);
             CmdEnd("ok");
@@ -425,6 +425,12 @@ namespace Edlink {
             Console.ForegroundColor = old;
         }
 
+        protected void Dscmd(CmdLine cmd) {
+
+            CmdStart(cmd, cmd.getStr(Cli.ArgCmd) + "...");
+            dcmd.Dscmd(cmd);
+            CmdEnd("ok");
+        }
         //************************************************************************************************ 
         void CopyFile(CmdLine cmd, string src, string dst) {
 

@@ -119,5 +119,13 @@ namespace Edlink.DEV_ED64 {
             return rom;
         }
 
+        internal void VramDump(byte[] vram) {
+
+            int dump_addr;
+            dev.FifoWR("*v");
+            dump_addr = link.rx32();
+            dev.MemRD(dump_addr, vram, 0, vram.Length);
+        }
+
     }
 }

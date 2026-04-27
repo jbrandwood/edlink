@@ -19,6 +19,9 @@ namespace Edlink.DEV_ED64 {
 
         const int ADDR_FCI_SYS = 0x10000000;//system registers
 
+        const byte CMD_DEV = 0x85;
+        const byte DEV_SCMD_CIC_UPD = 0x25;
+
         public enum SysInf {
 
             //static vals
@@ -73,6 +76,19 @@ namespace Edlink.DEV_ED64 {
         internal int SysGetInf(SysInf request) {
             return SysGetInf(new SysInf[] { request })[0];
         }
+
+
+        internal void CicUpd(string path) {
+
+            byte []data = File.ReadAllBytes(path);
+
+            link.txCMD(CMD_DEV, DEV_SCMD_CIC_UPD);
+            link.tx32(data.Length);
+            link.tx8((byte)EpoType.LINK_ACK);
+            link.txDataACK(data, 0, data.Length);
+            CheckStatus();
+        }
+      
 
     }
 }

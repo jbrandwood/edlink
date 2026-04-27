@@ -61,7 +61,7 @@ namespace Edlink.Device {
         const byte EPO_WER_SRC = 0x01;
         const byte EPO_WER_DST = 0x02;
 
-        enum EpoType {
+        protected enum EpoType {
             LINK = 0x10,//  link (usb or console)
             LINK_ACK, //    link (usb or console)
             FS, //          file
@@ -272,20 +272,20 @@ namespace Edlink.Device {
 
             return resp;
         }
-        //************************************************************************************************ private
-        int GetNresp(int resp) {
-            link.txCMD(CMD_NRESP);
-            link.tx8(resp);
-            return link.rx8();
-        }
 
-        void CheckStatus() {
+        protected void CheckStatus() {
 
             int resp = GetStatus();
             if (resp != 0) {
                 int nresp = GetNresp(resp);
                 throw new Exception("operation error: " + resp.ToString("X2") + "." + nresp.ToString("X2"));
             }
+        }
+        //************************************************************************************************ private
+        int GetNresp(int resp) {
+            link.txCMD(CMD_NRESP);
+            link.tx8(resp);
+            return link.rx8();
         }
 
         bool IsServiceMode() {
@@ -350,6 +350,7 @@ namespace Edlink.Device {
         void TxApp(byte[] data) {
 
             link.tx32(data.Length);
+            link.tx8((byte)EpoType.LINK_ACK);
             link.txDataACK(data, 0, 512);
             link.txDataACK(data, 512, data.Length - 512);
         }

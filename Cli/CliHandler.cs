@@ -183,6 +183,10 @@ namespace Edlink {
                     base.Diag(cmd);
                     break;
 
+                case Cli.CmdDscmd:
+                    base.Dscmd(cmd);
+                    break;
+
                 default:
                     throw new CmdException(CmdExceptionType.UnknownCmd);
             }
