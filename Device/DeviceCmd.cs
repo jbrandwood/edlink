@@ -130,7 +130,18 @@ namespace Edlink.Device {
             return msg;
         }
 
+        public virtual string RtcCalSet(int ppm_val) {
 
+           
+            dev.RtcCalSet(ppm_val);
+
+            int resp = dev.RtcCal(DateTime.Now, 3);//read back calib val
+
+            string sig = resp > 0 ? "+" : "";
+            string msg = "rtc calibration: " + sig + resp;
+
+            return msg;
+        }
 
 
         public virtual void Reset(string mode) {

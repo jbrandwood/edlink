@@ -316,9 +316,15 @@ namespace Edlink {
 
             CmdStart(cmd, "rtc cal...");
             string msg;
-            int arg = cmd.getInt(Cli.ArgCmd);
 
-            msg = dcmd.RtcCal(arg);
+            if (cmd.HasArg(Cli.ArgVal)) {
+                int arg = cmd.getInt(Cli.ArgVal);
+                msg = dcmd.RtcCalSet(arg);
+            } else {
+                int arg = cmd.getInt(Cli.ArgCmd);
+                msg = dcmd.RtcCal(arg);
+            }
+            
             CmdEnd("ok");
 
             Tools.PrintLine(msg, inf_color);
