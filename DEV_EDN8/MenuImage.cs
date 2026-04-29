@@ -29,20 +29,20 @@ namespace Edlink.DEV_EDN8 {
         const int screen_w = 32;//320/8
         const int screen_h = 28;//224/8
 
-        public static void makeImage(string path, byte[] chr, byte[] vram, byte[] pal) {
+        public static void MakeImage(string path, byte[] chr, byte[] vram, byte[] pal) {
 
 
             Bitmap pic = new Bitmap(screen_w * 8, screen_h * 8);
 
 
-            int[] pal32 = getPal32(pal);
-            //UInt16[] plan_a = getPlan(vram, 0xC000);
-            //UInt16[] plan_b = getPlan(vram, 0xE000);
+            int[] pal32 = GetPal32(pal);
+            //UInt16[] plan_a = GetPlan(vram, 0xC000);
+            //UInt16[] plan_b = GetPlan(vram, 0xE000);
 
 
-            int[] pixels = getPixels(chr, vram);
+            int[] pixels = GetPixels(chr, vram);
 
-            renderImg(pic, pal32, pixels);
+            RenderImg(pic, pal32, pixels);
 
             Console.WriteLine("path: " + path);
             pic.Save(path);
@@ -50,7 +50,7 @@ namespace Edlink.DEV_EDN8 {
 
 
 
-        static int[] getPixels(byte[] chr, byte[] vram) {
+        static int[] GetPixels(byte[] chr, byte[] vram) {
 
 
             int w = screen_w * 8;
@@ -66,14 +66,15 @@ namespace Edlink.DEV_EDN8 {
                 int tile_idx = vram[tile_ptr * 2 + 0];
                 int tile_atr = vram[tile_ptr * 2 + 1];
 
-                pixels[i] = getPixel(chr, tile_idx, tile_atr, x, y);
+                pixels[i] = GetPixel(chr, tile_idx, tile_atr, x, y);
 
             }
 
             return pixels;
         }
 
-        public static int getPixel(byte[] chr, int tile_idx, int tile_atr, int x, int y) {
+        public static int GetPixel(byte[] chr, int tile_idx, int tile_atr, int x, int y) {
+
             int pixel;
             x %= 8;
             y %= 8;
@@ -99,7 +100,8 @@ namespace Edlink.DEV_EDN8 {
             return pixel;
         }
 
-        static int[] getPal32(byte[] pal) {
+        static int[] GetPal32(byte[] pal) {
+
             int[] pal32 = new int[pal.Length];
             int alpha = 0xff0000;
             alpha <<= 8;
@@ -118,7 +120,8 @@ namespace Edlink.DEV_EDN8 {
             return pal32;
         }
 
-        static void renderImg(Bitmap pic, int[] pal32, int[] pixels) {
+        static void RenderImg(Bitmap pic, int[] pal32, int[] pixels) {
+
             int w = screen_w * 8;
 
             for (int i = 0; i < pixels.Length; i++) {

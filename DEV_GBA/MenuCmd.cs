@@ -35,7 +35,7 @@ namespace Edlink.DEV_GBA {
 
             int dump_addr;
             dev.SetBootMode(BMOD_GBA_VDUMP);
-            dump_addr = link.rx32();
+            dump_addr = link.Rx32();
 
 
             dev.MemRD(dump_addr, vram, 0, 96 * 1024);

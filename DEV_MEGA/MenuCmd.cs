@@ -27,7 +27,7 @@ namespace Edlink.DEV_MEGA {
 
 
             try {
-                resp = link.rx8();
+                resp = link.Rx8();
             } catch (Exception) {
                 throw new Exception("mcmd: no response from menu");
             }
@@ -56,7 +56,7 @@ namespace Edlink.DEV_MEGA {
                 }
             }
 
-            resp = link.rx8();
+            resp = link.Rx8();
 
             if (resp != 'r') {
                 throw new Exception("unexpected usb status: " + resp.ToString("X2"));
@@ -69,7 +69,7 @@ namespace Edlink.DEV_MEGA {
 
             dev.FifoWR("*i");
             dev.FifoTxString(path);
-            resp = link.rx8();
+            resp = link.Rx8();
             if (resp != 0) {
                 throw new Exception("app instalation error: " + resp.ToString("X2"));
             }
@@ -83,7 +83,7 @@ namespace Edlink.DEV_MEGA {
 
             int dump_addr;
             dev.FifoWR("*v");
-            dump_addr = link.rx32();
+            dump_addr = link.Rx32();
 
             dev.MemRD(dump_addr, vram, 0, 0x10000);
             dev.MemRD(dump_addr + 0x10000, palette, 0, 128);

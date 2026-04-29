@@ -24,17 +24,17 @@ namespace Edlink.DEV_GBA {
             dev.ExitServiceMode();
 
             if (dev.SIZE_RAM0 != 0) {
-                resp = testMEM("RAM0", DeviceIO.ADDR_FCI_RAM0, dev.SIZE_RAM0);
-                printResp(resp);
+                resp = TestMEM("RAM0", DeviceIO.ADDR_FCI_RAM0, dev.SIZE_RAM0);
+                PrintResp(resp);
             }
 
             if (dev.SIZE_RAM1 != 0) {
-                resp = testMEM("RAM1", DeviceIO.ADDR_FCI_RAM1, dev.SIZE_RAM1);
-                printResp(resp);
+                resp = TestMEM("RAM1", DeviceIO.ADDR_FCI_RAM1, dev.SIZE_RAM1);
+                PrintResp(resp);
             }
 
-            resp = testRTC();
-            printResp(resp);
+            resp = TestRTC();
+            PrintResp(resp);
 
             testVDC();
 
@@ -50,7 +50,7 @@ namespace Edlink.DEV_GBA {
             dev.GetVdc();
             vdc = dev.GetVdc();
 
-            printVDC("Battery ", vdc.bat, 0x250, 0x345);
+            PrintVDC("Battery ", vdc.bat, 0x250, 0x345);
         }
 
     }

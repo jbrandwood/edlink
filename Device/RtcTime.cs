@@ -45,7 +45,7 @@ namespace Edlink.Device {
             return (byte)hex;
         }
 
-        public byte[] getVals() {
+        public byte[] GetVals() {
 
             byte[] vals = new byte[size];
             vals[0] = yar;
@@ -60,6 +60,7 @@ namespace Edlink.Device {
         }
 
         public void Print() {
+
             Console.WriteLine("RTC date: " + dom.ToString("X2") + "." + mon.ToString("X2") + ".20" + yar.ToString("X2"));
             Console.WriteLine("RTC time: " + hur.ToString("X2") + ":" + min.ToString("X2") + ":" + sec.ToString("X2"));
         }

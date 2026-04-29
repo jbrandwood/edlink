@@ -57,7 +57,7 @@ namespace Edlink.Device {
         public int UsbRD(byte[] buff, int offset, int len) {
 
             len = Math.Min(len, dev.Link.BytesToRead);
-            dev.Link.rxData(buff, offset, len);
+            dev.Link.RxData(buff, offset, len);
             return len;
         }
 
@@ -104,7 +104,7 @@ namespace Edlink.Device {
         public virtual string RtcCal(int cmd) {
 
             //Cmd-0: set time and abort calibraion
-            //Cmd-1: start calibration
+            //Cmd-1: Start calibration
             //Cmd-2: finish calibration
             //Cmd-3: get current calibration value
             //Cmd-4: get estimated calibration value
@@ -182,6 +182,10 @@ namespace Edlink.Device {
 
         public virtual void Dscmd(CmdLine cmd) {
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
+
+        public virtual void NetGate(CmdLine cmd) {
+            Edlink.NetGate.Start(dev);
         }
 
         protected string AppDeploy(string rom_path, string fpga_path) {

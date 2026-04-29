@@ -16,6 +16,7 @@ namespace Edlink.DEV_MEGA {
         int spr_tile;
 
         public Sprite(byte[] vram, int offset, int idx) {
+
             offset += idx * 8;
 
             spr_y = ((vram[offset + 0] & 3) << 8) | (vram[offset + 1] << 0);
@@ -39,7 +40,8 @@ namespace Edlink.DEV_MEGA {
             get { return next_tile; }
         }
 
-        public void getShadow(byte[] vram, int[] shad_map, int screen_w) {
+        public void GetShadow(byte[] vram, int[] shad_map, int screen_w) {
+
             int pw = spr_w * 8;
             int ph = spr_h * 8;
 
@@ -51,7 +53,7 @@ namespace Edlink.DEV_MEGA {
                 int tile = i / 8 % spr_w * spr_h + i / (8 * 8 * spr_w);
                 tile += spr_tile;
 
-                int pixel = MenuImage.getPixel(vram, tile, i % pw, i / pw);
+                int pixel = MenuImage.GetPixel(vram, tile, i % pw, i / pw);
                 if (pixel == 15) {
                     shad_map[pptr] = 1;
                 }

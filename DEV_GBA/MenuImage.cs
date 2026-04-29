@@ -22,29 +22,29 @@ namespace Edlink.DEV_GBA {
         const int screen_w = 30;//320/8
         const int screen_h = 20;//224/8
 
-        public static void makeImage(string path, byte[] vram, byte[] pal8, byte[] regs) {
+        public static void MakeImage(string path, byte[] vram, byte[] pal8, byte[] regs) {
 
 
             Bitmap pic = new Bitmap(screen_w * 8, screen_h * 8);
             LcdConfig[] cfg = null;
 
-            UInt16[] pal16 = data8To16(pal8);
-            int[] pal32 = getPal32(pal16);
+            UInt16[] pal16 = Data8To16(pal8);
+            int[] pal32 = GetPal32(pal16);
 
 
-            cfg = getConfig(data8To16(regs));
+            cfg = GetConfig(Data8To16(regs));
 
 
-            fillBG(pic, pal32[0]);
+            FillBG(pic, pal32[0]);
 
             for (int i = 0; i < cfg.Length; i++) {
-                drawPlan(pic, vram, pal32, cfg[i]);
+                DrawPlan(pic, vram, pal32, cfg[i]);
             }
 
             pic.Save(path);
         }
 
-        static LcdConfig[] getConfig(UInt16[] regs) {
+        static LcdConfig[] GetConfig(UInt16[] regs) {
 
             LcdConfig[] cfg = new LcdConfig[4];
 
@@ -83,7 +83,7 @@ namespace Edlink.DEV_GBA {
             return cfg;
         }
 
-        static void fillBG(Bitmap pic, int color) {
+        static void FillBG(Bitmap pic, int color) {
 
             Color c = Color.FromArgb(color);
 
@@ -96,14 +96,14 @@ namespace Edlink.DEV_GBA {
             }
         }
 
-        static void drawPlan(Bitmap pic, byte[] vram, int[] pal32, LcdConfig cfg) {
+        static void DrawPlan(Bitmap pic, byte[] vram, int[] pal32, LcdConfig cfg) {
 
 
             if (!cfg.enabled) {
                 return;
             }
 
-            UInt16[] tilemap = getTilemap(vram, cfg.tmap_src);
+            UInt16[] tilemap = GetTilemap(vram, cfg.tmap_src);
 
             for (int i = 0; i < screen_w * screen_h * 8 * 8; i++) {
 
@@ -112,7 +112,7 @@ namespace Edlink.DEV_GBA {
                 int tile_ptr = x / 8 + y / 8 * screen_w;
                 int tile_pal = tilemap[tile_ptr] >> 12;
                 int tile_idx = (tilemap[tile_ptr] & 0x1FF) + (cfg.chr_src / 32);
-                int tile_pixel = getPixel(vram, tile_idx, x, y);
+                int tile_pixel = GetPixel(vram, tile_idx, x, y);
 
                 if (tile_pixel == 0) continue;
 
@@ -148,7 +148,7 @@ namespace Edlink.DEV_GBA {
             }
         }
 
-        static int getPixel(byte[] vram, int tile_idx, int x, int y) {
+        static int GetPixel(byte[] vram, int tile_idx, int x, int y) {
 
             int pixel = 0;
             x %= 8;
@@ -163,7 +163,7 @@ namespace Edlink.DEV_GBA {
             return pixel;
         }
 
-        static UInt16[] getTilemap(byte[] vram, int offset) {
+        static UInt16[] GetTilemap(byte[] vram, int offset) {
 
             UInt16[] map = new UInt16[screen_w * screen_h];
 
@@ -180,7 +180,7 @@ namespace Edlink.DEV_GBA {
             return map;
         }
 
-        static UInt16[] data8To16(byte[] data8) {
+        static UInt16[] Data8To16(byte[] data8) {
 
             UInt16[] data16 = new UInt16[data8.Length / 2];
 
@@ -192,7 +192,7 @@ namespace Edlink.DEV_GBA {
             return data16;
         }
 
-        static int[] getPal32(UInt16[] pal16) {
+        static int[] GetPal32(UInt16[] pal16) {
 
             int[] pal32 = new int[pal16.Length];
 

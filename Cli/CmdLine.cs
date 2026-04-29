@@ -64,7 +64,7 @@ namespace Edlink {
             }
         }
 
-        public string getStr(string arg_name) {
+        public string GetStr(string arg_name) {
 
             int arg_idx = SeekArg(arg_name);
             int val_idx = SeekVal(arg_idx);
@@ -72,9 +72,9 @@ namespace Edlink {
             return cmd[val_idx].Trim();
         }
 
-        public int getInt(string arg_name) {
+        public int GetInt(string arg_name) {
 
-            string val = getStr(arg_name).ToLower();
+            string val = GetStr(arg_name).ToLower();
 
             if (val.StartsWith("0x")) {
                 return int.Parse(val.Substring(2), NumberStyles.HexNumber);

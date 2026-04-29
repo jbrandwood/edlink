@@ -71,8 +71,8 @@ namespace Edlink.DEV_MEGA {
 
         internal void hostReset(byte rst) {
             
-            link.txCMD(CMD_HOST_RST);
-            link.tx8(rst);
+            link.TxCMD(CMD_HOST_RST);
+            link.Tx8(rst);
 
             if (rst_state == HOST_RST_OFF && rst != HOST_RST_OFF) {
                 Thread.Sleep(50);
@@ -102,28 +102,28 @@ namespace Edlink.DEV_MEGA {
 
             int ptr = 20;
 
-            inf.serial_g = (UInt32)Link.num32(buff, ptr);
+            inf.serial_g = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
-            inf.serial_l = (UInt32)Link.num32(buff, ptr);
+            inf.serial_l = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
-            inf.boot_ctr = (UInt32)Link.num32(buff, ptr);
+            inf.boot_ctr = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
-            inf.game_ctr = (UInt32)Link.num32(buff, ptr);
+            inf.game_ctr = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
 
-            inf.asm_date = Link.num16(buff, ptr);
+            inf.asm_date = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.asm_time = Link.num16(buff, ptr);
+            inf.asm_time = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.sw_date = Link.num16(buff, ptr);
+            inf.sw_date = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.sw_time = Link.num16(buff, ptr);
+            inf.sw_time = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.sw_ver = Link.num16(buff, ptr);
+            inf.sw_ver = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.hw_ver = Link.num16(buff, ptr);
+            inf.hw_ver = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.boot_ver = Link.num16(buff, ptr);
+            inf.boot_ver = Link.Num16(buff, ptr);
             ptr += 2;
 
             inf.device_id = buff[ptr++];

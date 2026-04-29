@@ -13,7 +13,7 @@ namespace Edlink.Device {
 
         public abstract void Start();
 
-        protected int testMEM(string name, int addr, int size) {
+        protected int TestMEM(string name, int addr, int size) {
 
             byte[] buff;
             Console.Write("Testing " + name + "...");
@@ -65,7 +65,7 @@ namespace Edlink.Device {
             return 0;
         }
 
-        protected int testRTC() {
+        protected int TestRTC() {
 
             RtcTime rtc_old;
             RtcTime rtc_now;
@@ -96,7 +96,7 @@ namespace Edlink.Device {
             return 0;
         }
 
-        protected int printVDC(string name, UInt16 vdc, int min, int max) {
+        protected int PrintVDC(string name, UInt16 vdc, int min, int max) {
 
             bool ok = vdc >= min && vdc <= max;
             Console.Write(name + " - " + (vdc >> 8).ToString("X2") + "." + (vdc & 0xff).ToString("X2"));
@@ -115,7 +115,7 @@ namespace Edlink.Device {
             return ok ? 0 : 1;
         }
 
-        protected void printResp(int resp) {
+        protected void PrintResp(int resp) {
 
             ConsoleColor old = Console.ForegroundColor;
 

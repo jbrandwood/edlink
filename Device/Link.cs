@@ -60,6 +60,7 @@ namespace Edlink.Device {
         }
 
         public string PortName {
+
             get { return port.PortName; }
             set {
                 if (cfg_locked) {
@@ -69,6 +70,7 @@ namespace Edlink.Device {
             }
         }
         public byte DeviceID {
+
             get { return dcfg.DeviceId; }
             set {
                 if (cfg_locked) {
@@ -78,6 +80,7 @@ namespace Edlink.Device {
             }
         }
         public byte ProtocolID {
+
             get { return dcfg.ProtocolId; }
             set {
                 if (cfg_locked) {
@@ -88,11 +91,13 @@ namespace Edlink.Device {
         }
 
         public bool SwapEndians {
+
             get { return swap_endians; }
             set { swap_endians = value; }
         }
 
         public int BytesToRead {
+
             get { return port.BytesToRead; }
         }
         //************************************************************************************************
@@ -156,12 +161,12 @@ namespace Edlink.Device {
             }
         }
 
-        public void txData(byte[] buff) {
-            txData(buff, 0, buff.Length);
+        public void TxData(byte[] buff) {
+            TxData(buff, 0, buff.Length);
         }
 
 
-        public void txData(byte[] buff, int offset, int len) {
+        public void TxData(byte[] buff, int offset, int len) {
 
             while (len > 0) {
 
@@ -180,24 +185,24 @@ namespace Edlink.Device {
             port.Write(new byte[0], 0, 0);
         }
 
-        public void txData(string str) {
+        public void TxData(string str) {
 
             port.Write(str);
             port.Write(new byte[0], 0, 0);
         }
 
-        public void rxData(byte[] buff, int offset, int len) {
+        public void RxData(byte[] buff, int offset, int len) {
 
             for (int i = 0; i < len;) {
                 i += port.Read(buff, offset + i, len - i);
             }
         }
 
-        public void txDataACK(byte[] buff, int offset, int len) {
+        public void TxDataACK(byte[] buff, int offset, int len) {
 
             while (len > 0) {
 
-                int resp = rx8();
+                int resp = Rx8();
 
                 if (resp != 0) {
                     throw new Exception("tx ack: " + resp.ToString("X2"));
@@ -205,71 +210,87 @@ namespace Edlink.Device {
 
                 int block = Math.Min(len, ack_block_size);
 
-                txData(buff, offset, block);
+                TxData(buff, offset, block);
 
                 len -= block;
                 offset += block;
             }
         }
 
-        public void tx8(int arg) {
+        public void Tx8(int arg) {
 
             byte[] buff = new byte[1];
             buff[0] = (byte)(arg);
-            txData(buff, 0, buff.Length);
+            TxData(buff, 0, buff.Length);
         }
 
-        public byte rx8() {
+        public byte Rx8() {
             return (byte)port.ReadByte();
         }
 
-        public void tx16(int arg) {
+        public void Tx16(int arg) {
 
-            byte[] buff = num16(arg);
-            txData(buff, 0, buff.Length);
+            byte[] buff = Num16(arg);
+            TxData(buff, 0, buff.Length);
         }
 
-        public UInt16 rx16() {
+        public UInt16 Tx16() {
 
             byte[] buff = new byte[2];
-            rxData(buff, 0, buff.Length);
-            return num16(buff);
+            RxData(buff, 0, buff.Length);
+            return Num16(buff);
         }
 
-        public byte[] rxData(int len) {
+        public int Rx16() {
+
+            byte[] buff = new byte[2];
+            RxData(buff, 0, buff.Length);
+            return Num16(buff);
+        }
+
+        public byte[] RxData(int len) {
             byte[] buff = new byte[len];
-            rxData(buff, 0, len);
+            RxData(buff, 0, len);
             return buff;
         }
 
-        public void tx32(int arg) {
+        public void Tx32(int arg) {
 
-            byte[] buff = num32(arg);
-            txData(buff, 0, buff.Length);
+            byte[] buff = Num32(arg);
+            TxData(buff, 0, buff.Length);
         }
 
-        public int rx32() {
+        public int Rx32() {
 
             byte[] buff = new byte[4];
-            rxData(buff, 0, buff.Length);
-            return num32(buff);
+            RxData(buff, 0, buff.Length);
+            return Num32(buff);
         }
 
-        public void txString(string str) {
-            tx16(str.Length);
-            txData(str);
+        public void TxString(string str) {
+
+            Tx16(str.Length);
+            TxData(str);
         }
 
-        public void txCMD(byte cmd_code) {
+        public string RxString() {
+            int len = Rx16();
+            byte[] buff = new byte[len];
+            RxData(buff, 0, buff.Length);
+            return System.Text.Encoding.UTF8.GetString(buff);
+        }
+
+        public void TxCMD(byte cmd_code) {
+
             byte[] cmd = new byte[4];
             cmd[0] = (byte)('+');
             cmd[1] = (byte)('+' ^ 0xff);
             cmd[2] = cmd_code;
             cmd[3] = (byte)(cmd_code ^ 0xff);
-            txData(cmd);
+            TxData(cmd);
         }
 
-        public void txCMD(byte cmd_code, byte scmd) {
+        public void TxCMD(byte cmd_code, byte scmd) {
 
             byte[] cmd = new byte[5];
             cmd[0] = (byte)('+');
@@ -277,10 +298,10 @@ namespace Edlink.Device {
             cmd[2] = cmd_code;
             cmd[3] = (byte)(cmd_code ^ 0xff);
             cmd[4] = scmd;
-            txData(cmd);
+            TxData(cmd);
         }
 
-        public int waitResp(int max_time_ms) {
+        public int WaitResp(int max_time_ms) {
 
             int old_tout = port.ReadTimeout;
             port.ReadTimeout = max_time_ms;
@@ -319,7 +340,7 @@ namespace Edlink.Device {
             }
         }
         //************************************************************************************************
-        int num(byte[] val, int bytes) {
+        int Num(byte[] val, int bytes) {
 
             int val_out = 0;
 
@@ -336,7 +357,7 @@ namespace Edlink.Device {
             return val_out;
         }
 
-        byte[] num(int val, int bytes) {
+        byte[] Num(int val, int bytes) {
 
             byte[] val_out = new byte[bytes];
 
@@ -354,37 +375,37 @@ namespace Edlink.Device {
         }
 
 
-        public byte[] num32(int val) {
+        public byte[] Num32(int val) {
 
-            return num(val, 4);
+            return Num(val, 4);
         }
 
-        public int num32(byte[] val, int offset) {
+        public int Num32(byte[] val, int offset) {
 
             byte[] buff = new byte[4];
             Array.Copy(val, offset, buff, 0, buff.Length);
-            return num32(buff);
+            return Num32(buff);
         }
 
-        public int num32(byte[] val) {
+        public int Num32(byte[] val) {
 
-            return (int)num(val, 4);
+            return (int)Num(val, 4);
         }
 
-        public byte[] num16(int val) {
+        public byte[] Num16(int val) {
 
-            return num(val, 2);
+            return Num(val, 2);
         }
 
-        public UInt16 num16(byte[] val, int offset) {
+        public UInt16 Num16(byte[] val, int offset) {
 
             byte[] buff = new byte[2];
             Array.Copy(val, offset, buff, 0, buff.Length);
-            return num16(buff);
+            return Num16(buff);
         }
 
-        public UInt16 num16(byte[] val) {
-            return (UInt16)num(val, 2);
+        public UInt16 Num16(byte[] val) {
+            return (UInt16)Num(val, 2);
         }
 
         void OpenConnection(string pname) {
@@ -395,7 +416,7 @@ namespace Edlink.Device {
                 port.WriteTimeout = 200;
                 port.BaudRate = 921600;
                 port.Open();
-                txData(new byte[64 + 2]);
+                TxData(new byte[64 + 2]);
                 FlushPort();
                 GetID();
                 port.ReadTimeout = 2000;
@@ -429,7 +450,7 @@ namespace Edlink.Device {
                 cfg = dcfg;
             }
 
-            txCMD(CMD_STATUS);
+            TxCMD(CMD_STATUS);
 
             if (timeout_ms != 0) {
 
@@ -443,16 +464,16 @@ namespace Edlink.Device {
             }
 
             if (cfg.ProtocolGen == Protocol.Gen3) {
-                rxData(id, 0, id.Length);
+                RxData(id, 0, id.Length);
             } else {
 
                 //transform legacy status resp to Gen3
                 if (cfg.ProtocolId == PROTOCOL_ID_N8) {
-                    id[3] = rx8();
-                    id[0] = rx8();
+                    id[3] = Rx8();
+                    id[0] = Rx8();
                 } else {
-                    id[0] = rx8();
-                    id[3] = rx8();
+                    id[0] = Rx8();
+                    id[3] = Rx8();
                 }
 
                 if (id[0] != STATUS_KEY_OLD) {
@@ -531,19 +552,19 @@ namespace Edlink.Device {
 
             byte[] id = new byte[4];
 
-            txCMD(CMD_STATUS2);
-            txCMD(CMD_STATUS);
+            TxCMD(CMD_STATUS2);
+            TxCMD(CMD_STATUS);
 
-            rxData(id, 0, 2);
+            RxData(id, 0, 2);
 
 
             if (id[0] == STATUS_KEY) {
 
                 //new status Cmd. not supported by old firmware (and bootladers)
-                rxData(id, 2, 2);//remain CMD_STATUS2 status bytes
+                RxData(id, 2, 2);//remain CMD_STATUS2 status bytes
 
                 if (id[1] == PROTOCOL_ID_MEGA || id[1] == PROTOCOL_ID_N8) {
-                    rxData(2);//remain CMD_STATUS status bytes
+                    RxData(2);//remain CMD_STATUS status bytes
                     cfg.ProtocolGen = Protocol.Gen2;
                 } else {
                     cfg.ProtocolGen = Protocol.Gen3;

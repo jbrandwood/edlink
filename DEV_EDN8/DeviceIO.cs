@@ -69,24 +69,24 @@ namespace Edlink.DEV_EDN8 {
 
             int ptr = 20;
 
-            inf.serial_g = (UInt32)Link.num32(buff, ptr);
+            inf.serial_g = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
-            inf.serial_l = (UInt32)Link.num32(buff, ptr);
+            inf.serial_l = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
-            inf.boot_ctr = (UInt32)Link.num32(buff, ptr);
+            inf.boot_ctr = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
-            inf.game_ctr = (UInt32)Link.num32(buff, ptr);
+            inf.game_ctr = (UInt32)Link.Num32(buff, ptr);
             ptr += 4;
 
-            inf.asm_date = Link.num16(buff, ptr);
+            inf.asm_date = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.asm_time = Link.num16(buff, ptr);
+            inf.asm_time = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.sw_ver = Link.num16(buff, ptr);
+            inf.sw_ver = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.hw_ver = Link.num16(buff, ptr);
+            inf.hw_ver = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.boot_ver = Link.num16(buff, ptr);
+            inf.boot_ver = Link.Num16(buff, ptr);
             ptr += 2;
 
             inf.device_id = buff[ptr++];
@@ -94,9 +94,9 @@ namespace Edlink.DEV_EDN8 {
             ptr = 64 - 9;
             inf.flash_size = 1 << buff[ptr++];
 
-            inf.sw_date = Link.num16(buff, ptr);
+            inf.sw_date = Link.Num16(buff, ptr);
             ptr += 2;
-            inf.sw_time = Link.num16(buff, ptr);
+            inf.sw_time = Link.Num16(buff, ptr);
             ptr += 2;
 
 

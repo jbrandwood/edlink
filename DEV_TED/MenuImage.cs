@@ -12,14 +12,14 @@ namespace Edlink.DEV_TED {
         const int screen_w = 40;//320/8
         const int screen_h = 28;//224/8
 
-        public static void makeImage(string path, byte[] vram, byte[] pal8) {
+        public static void MakeImage(string path, byte[] vram, byte[] pal8) {
 
 
             Bitmap pic = new Bitmap(screen_w * 8, screen_h * 8);
 
-            UInt16[] pal16 = getPal16(pal8);
-            int[] pal32 = getPal32(pal16);
-            UInt16[] tilemap = getTilemap(vram);
+            UInt16[] pal16 = GetPal16(pal8);
+            int[] pal32 = GetPal32(pal16);
+            UInt16[] tilemap = GetTilemap(vram);
 
 
             for (int i = 0; i < 320 * 224; i++) {
@@ -28,7 +28,7 @@ namespace Edlink.DEV_TED {
                 int tile_ptr = x / 8 + y / 8 * screen_w;
                 int tile_pal = tilemap[tile_ptr] >> 12;
                 int tile_idx = tilemap[tile_ptr] & 0xfff;
-                int tile_pixel = getPixel(vram, tile_idx, x, y);
+                int tile_pixel = GetPixel(vram, tile_idx, x, y);
 
                 int rgb = pal32[tile_pal * 16 + tile_pixel];
 
@@ -38,7 +38,8 @@ namespace Edlink.DEV_TED {
             pic.Save(path);
         }
 
-        static int getPixel(byte[] vram, int tile_idx, int x, int y) {
+        static int GetPixel(byte[] vram, int tile_idx, int x, int y) {
+
             int pixel = 0;
             x %= 8;
             y %= 8;
@@ -59,7 +60,7 @@ namespace Edlink.DEV_TED {
             return pixel;
         }
 
-        static UInt16[] getTilemap(byte[] vram) {
+        static UInt16[] GetTilemap(byte[] vram) {
 
             UInt16[] map = new UInt16[screen_w * screen_h];
 
@@ -72,7 +73,8 @@ namespace Edlink.DEV_TED {
             return map;
         }
 
-        static UInt16[] getPal16(byte[] pal8) {
+        static UInt16[] GetPal16(byte[] pal8) {
+
             UInt16[] pal16 = new UInt16[pal8.Length / 2];
 
             for (int i = 0; i < pal16.Length; i++) {
@@ -82,7 +84,8 @@ namespace Edlink.DEV_TED {
             return pal16;
         }
 
-        static int[] getPal32(UInt16[] pal16) {
+        static int[] GetPal32(UInt16[] pal16) {
+
             int[] pal32 = new int[pal16.Length];
 
             for (int i = 0; i < pal32.Length; i++) {

@@ -66,7 +66,7 @@ namespace Edlink.Device {
         public void FifoTxString(string str) {
 
             byte[] bytes = Encoding.ASCII.GetBytes(str);
-            byte[] len = link.num16(bytes.Length);
+            byte[] len = link.Num16(bytes.Length);
             FifoWR(len, 0, 2);
             FifoWR(bytes, 0, bytes.Length);
         }

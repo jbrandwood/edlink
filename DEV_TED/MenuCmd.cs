@@ -24,10 +24,10 @@ namespace Edlink.DEV_TED {
             int resp;
             int tout = 2000;
 
-            dev.hostReset(DeviceIO.HOST_RST_ON);//DeviceIO.HOST_RST_SOFT
+            dev.HostReset(DeviceIO.HOST_RST_ON);//DeviceIO.HOST_RST_SOFT
             Thread.Sleep(10);
             dev.ConfigReset();
-            dev.hostReset(DeviceIO.HOST_RST_OFF);
+            dev.HostReset(DeviceIO.HOST_RST_OFF);
 
             var sw = Stopwatch.StartNew();
 
@@ -38,7 +38,7 @@ namespace Edlink.DEV_TED {
                 }
             }
 
-            resp = link.rx8();
+            resp = link.Rx8();
 
             if (resp != 'r') {
                 throw new Exception("unexpected usb status: 0x" + resp.ToString("X2"));
@@ -51,7 +51,7 @@ namespace Edlink.DEV_TED {
             int resp;
             dev.FifoWR("*i");
             dev.FifoTxString(path);
-            resp = link.rx8();
+            resp = link.Rx8();
             if (resp != 0) {
                 throw new Exception("app instalation error: 0x" + resp.ToString("X2"));
             }
@@ -66,7 +66,7 @@ namespace Edlink.DEV_TED {
 
             int dump_addr;
             dev.FifoWR("*v");
-            dump_addr = link.rx32();
+            dump_addr = link.Rx32();
 
             dev.MemRD(dump_addr, vram, 0, 0x10000);
             dev.MemRD(dump_addr + 0x10000, palette, 0, 1024);

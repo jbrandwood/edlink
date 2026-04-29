@@ -34,6 +34,7 @@ namespace Edlink {
         }
 
         public static DateTime GetDeltaTime(long delta_ticks) {
+
             return new DateTime(DateTime.Now.Ticks - delta_ticks);
         }
 

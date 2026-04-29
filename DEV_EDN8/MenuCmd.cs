@@ -30,7 +30,7 @@ namespace Edlink.DEV_EDN8 {
             Cmd(cmd_test);
 
             try {
-                resp = link.rx8();
+                resp = link.Rx8();
             } catch (Exception) {
                 throw new Exception("mcmd: no response from menu");
             }
@@ -47,13 +47,13 @@ namespace Edlink.DEV_EDN8 {
             Cmd(cmd_sel_game);
             dev.FifoTxString(path);
 
-            resp = link.rx8();//game select status
+            resp = link.Rx8();//game select status
 
             if (resp != 0) {
                 throw new Exception("app install error 0x" + resp.ToString("X2"));
             }
 
-            int map_idx = link.rx16();
+            int map_idx = link.Tx16();
             return map_idx;
         }
 
@@ -64,14 +64,14 @@ namespace Edlink.DEV_EDN8 {
         public void Reset() {
 
             Cmd(cmd_reboot);
-            link.rx8();//wait till it ready ready 
+            link.Rx8();//wait till it ready ready 
         }
 
         public void VramDump(byte[] vram, byte[] palette) {
 
             Cmd(cmd_vram_dump);
-            link.rxData(vram, 0, 2048);
-            link.rxData(palette, 0, 16);
+            link.RxData(vram, 0, 2048);
+            link.RxData(palette, 0, 16);
         }
 
         void Cmd(char cmd) {

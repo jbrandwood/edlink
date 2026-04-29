@@ -83,7 +83,7 @@ namespace Edlink.DEV_MEGA {
             byte[] palette = new byte[128];
 
             mcmd.VramDump(vram, palette);
-            MenuImage.makeImage(path, vram, palette);
+            MenuImage.MakeImage(path, vram, palette);
         }
 
         public override string DevInf() {

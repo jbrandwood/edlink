@@ -111,7 +111,7 @@ namespace Edlink.Device {
                 return;
             }
 
-            link.txCMD(CMD_RUN_APP);
+            link.TxCMD(CMD_RUN_APP);
 
             BootWait();
             if (IsServiceMode()) {
@@ -125,8 +125,8 @@ namespace Edlink.Device {
                 return;
             }
 
-            link.txCMD(CMD_RST_MCU);
-            link.tx8(BMOD_MCU_SER);//only gba require ser mode, older carts accept any val
+            link.TxCMD(CMD_RST_MCU);
+            link.Tx8(BMOD_MCU_SER);//only gba require ser mode, older carts accept any val
 
             BootWait();
 
@@ -142,11 +142,11 @@ namespace Edlink.Device {
                 return;
             }
 
-            link.txCMD(CMD_MEM_WR);
-            link.tx32(addr);
-            link.tx32(len);
-            link.tx8(0);//exec
-            link.txData(buff, offset, len);
+            link.TxCMD(CMD_MEM_WR);
+            link.Tx32(addr);
+            link.Tx32(len);
+            link.Tx8(0);//exec
+            link.TxData(buff, offset, len);
         }
         public override void MemRD(int addr, byte[] buff, int offset, int len) {
 
@@ -154,26 +154,26 @@ namespace Edlink.Device {
                 return;
             }
 
-            link.txCMD(CMD_MEM_RD);
-            link.tx32(addr);
-            link.tx32(len);
-            link.tx8(0);//exec
-            link.rxData(buff, offset, len);
+            link.TxCMD(CMD_MEM_RD);
+            link.Tx32(addr);
+            link.Tx32(len);
+            link.Tx8(0);//exec
+            link.RxData(buff, offset, len);
         }
         public override void FlaWR(int addr, byte[] buff, int offset, int len) {
 
-            link.txCMD(CMD_FLA_WR);
-            link.tx32(addr);
-            link.tx32(len);
-            link.txDataACK(buff, offset, len);
+            link.TxCMD(CMD_FLA_WR);
+            link.Tx32(addr);
+            link.Tx32(len);
+            link.TxDataACK(buff, offset, len);
             CheckStatus();
         }
         public override void FlaRD(int addr, byte[] buff, int offset, int len) {
 
-            link.txCMD(CMD_FLA_RD);
-            link.tx32(addr);
-            link.tx32(len);
-            link.rxData(buff, offset, len);
+            link.TxCMD(CMD_FLA_RD);
+            link.Tx32(addr);
+            link.Tx32(len);
+            link.RxData(buff, offset, len);
         }
 
         public override void FifoWR(byte[] data, int offset, int len) {
@@ -183,9 +183,9 @@ namespace Edlink.Device {
 
         public override void FpgInit(byte[] data) {
 
-            link.txCMD(CMD_FPG_USB);
-            link.tx32(data.Length);
-            link.txDataACK(data, 0, data.Length);
+            link.TxCMD(CMD_FPG_USB);
+            link.Tx32(data.Length);
+            link.TxDataACK(data, 0, data.Length);
             CheckStatus();
         }
 
@@ -193,89 +193,90 @@ namespace Edlink.Device {
 
             FileOpen(path, FA_READ);
             int size = (int)FileAvailable();
-            link.txCMD(CMD_FPG_SDC);
-            link.tx32(size);
-            link.tx8(0);
+            link.TxCMD(CMD_FPG_SDC);
+            link.Tx32(size);
+            link.Tx8(0);
             CheckStatus();
         }
         public override void FileOpen(string path, int mode) {
 
             MakePath(path, mode);
 
-            link.txCMD(CMD_F_FOPN);
-            link.tx8(mode & ~FS_MAKEPATH);
-            link.txString(path);
+            link.TxCMD(CMD_F_FOPN);
+            link.Tx8(mode & ~FS_MAKEPATH);
+            link.TxString(path);
             CheckStatus();
         }
         public override void FileClose() {
 
-            link.txCMD(CMD_F_FCLOSE);
+            link.TxCMD(CMD_F_FCLOSE);
             CheckStatus();
         }
         public override UInt64 FileAvailable() {
 
-            link.txCMD(CMD_F_AVB);
+            link.TxCMD(CMD_F_AVB);
 
-            UInt64 hi = (UInt64)link.rx32();
-            UInt64 lo = (UInt64)link.rx32();
+            UInt64 hi = (UInt64)link.Rx32();
+            UInt64 lo = (UInt64)link.Rx32();
 
             return lo | (hi << 32);
         }
         public override void FileRead(byte[] buff, int offset, int len) {
 
-            link.txCMD(CMD_F_FRD);
-            link.tx32(len);
+            link.TxCMD(CMD_F_FRD);
+            link.Tx32(len);
 
             while (len > 0) {
 
                 int block = 4096;
                 if (block > len) block = len;
-                int resp = link.rx8();
+                int resp = link.Rx8();
                 if (resp != 0) {
                     throw new Exception("file read error: " + resp.ToString("X2"));
                 }
 
-                link.rxData(buff, offset, block);
+                link.RxData(buff, offset, block);
                 offset += block;
                 len -= block;
             }
         }
         public override void FileWrite(byte[] buff, int offset, int len) {
 
-            link.txCMD(CMD_F_FWR);
-            link.tx32(len);
-            link.txDataACK(buff, offset, len);
+            link.TxCMD(CMD_F_FWR);
+            link.Tx32(len);
+            link.TxDataACK(buff, offset, len);
             CheckStatus();
         }
 
         public override RtcTime RtcGet() {
 
-            link.txCMD(CMD_RTC_GET);
-            byte[] buff = link.rxData(RTC_SIZE);
+            link.TxCMD(CMD_RTC_GET);
+            byte[] buff = link.RxData(RTC_SIZE);
             return new RtcTime(buff);
         }
 
         public override void RtcSet(DateTime dt) {
 
             RtcTime rtc = new RtcTime(dt);
-            byte[] vals = rtc.getVals();
-            link.txCMD(CMD_RTC_SET);
-            link.txData(vals, 0, RTC_SIZE);
+            byte[] vals = rtc.GetVals();
+            link.TxCMD(CMD_RTC_SET);
+            link.TxData(vals, 0, RTC_SIZE);
         }
 
         public override int RtcCal(DateTime dt, byte arg) {
 
             RtcTime rtc = new RtcTime(dt);
-            byte[] vals = rtc.getVals();
+            byte[] vals = rtc.GetVals();
 
-            link.txCMD(CMD_RTC_CAL);
-            link.txData(vals, 0, 6);
-            link.tx8(arg);
+            link.TxCMD(CMD_RTC_CAL);
+            link.TxData(vals, 0, 6);
+            link.Tx8(arg);
 
-            return link.rx32();
+            return link.Rx32();
         }
 
         public override void RtcCalSet(int ppm_val) {
+
             throw new CmdException(CmdExceptionType.UnsupportedCmd);
         }
 
@@ -292,20 +293,20 @@ namespace Edlink.Device {
 
         public Vdc GetVdc() {
 
-            link.txCMD(CMD_GET_VDC);
+            link.TxCMD(CMD_GET_VDC);
 
             Vdc vdc;
-            vdc.v50 = link.rx16();
-            vdc.v25 = link.rx16();
-            vdc.v12 = link.rx16();
-            vdc.bat = link.rx16();
+            vdc.v50 = link.Tx16();
+            vdc.v25 = link.Tx16();
+            vdc.v12 = link.Tx16();
+            vdc.bat = link.Tx16();
             return vdc;
         }
 
         public void ResetEfu(int tout_sec) {
 
-            link.txCMD(CMD_RST_EFU);
-            link.tx8(0);//ack
+            link.TxCMD(CMD_RST_EFU);
+            link.Tx8(0);//ack
             BootWait(tout_sec);
         }
 
@@ -313,8 +314,8 @@ namespace Edlink.Device {
         //************************************************************************************************ protected
         protected byte[] GetSysInf() {
 
-            link.txCMD(CMD_SYS_INF);
-            return link.rxData(64);
+            link.TxCMD(CMD_SYS_INF);
+            return link.RxData(64);
         }
         //************************************************************************************************ private
 
@@ -328,8 +329,8 @@ namespace Edlink.Device {
 
         bool IsServiceMode() {
 
-            link.txCMD(CMD_GET_MODE);
-            byte resp = link.rx8();
+            link.TxCMD(CMD_GET_MODE);
+            byte resp = link.Rx8();
 
             if (resp == BMOD_MCU_SER) {
                 return true;
@@ -339,10 +340,10 @@ namespace Edlink.Device {
         }
 
 
-        void dirMake(string path) {
+        void DirMake(string path) {
 
-            link.txCMD(CMD_F_DIR_MK);
-            link.txString(path);
+            link.TxCMD(CMD_F_DIR_MK);
+            link.TxString(path);
 
             int resp = GetStatus();
             if (resp != 0 && resp != 8)//ignore error 8 (already exist)
@@ -369,15 +370,15 @@ namespace Edlink.Device {
                     return;
                 }
 
-                dirMake(path.Substring(0, sub_idx));
+                DirMake(path.Substring(0, sub_idx));
             }
         }
 
         void UpdExec_boot(int addr, int crc) {
 
-            link.txCMD(CMD_USB_RECOV);
-            link.tx32(ADDR_FLA_ICOR);
-            link.tx32(crc);
+            link.TxCMD(CMD_USB_RECOV);
+            link.Tx32(ADDR_FLA_ICOR);
+            link.Tx32(crc);
 
             int status = GetStatus(8000);
 
@@ -390,10 +391,10 @@ namespace Edlink.Device {
 
         void UpdExec_app(int addr, int crc) {
 
-            link.txCMD(CMD_UPD_EXEC);
-            link.tx32(addr);
-            link.tx32(crc);
-            link.tx8(0);//exec
+            link.TxCMD(CMD_UPD_EXEC);
+            link.Tx32(addr);
+            link.Tx32(crc);
+            link.Tx8(0);//exec
 
             BootWait(8);
         }

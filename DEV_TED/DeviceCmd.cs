@@ -45,9 +45,9 @@ namespace Edlink.DEV_TED {
             mode = mode.ToLower().Trim();
 
             if (mode.Equals("off")) {
-                dev.hostReset(DeviceIO.HOST_RST_OFF);
+                dev.HostReset(DeviceIO.HOST_RST_OFF);
             } else {
-                dev.hostReset(DeviceIO.HOST_RST_ON);
+                dev.HostReset(DeviceIO.HOST_RST_ON);
             }
         }
 
@@ -74,7 +74,7 @@ namespace Edlink.DEV_TED {
             byte[] palette = new byte[1024];
 
             mcmd.VramDump(vram, palette);
-            MenuImage.makeImage(path, vram, palette);
+            MenuImage.MakeImage(path, vram, palette);
         }
 
         public override string DevInf() {

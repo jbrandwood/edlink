@@ -68,7 +68,7 @@ namespace Edlink.DEV_EDN8 {
             mcmd.VramDump(vram, palette);
             MemRD(DeviceIO.ADDR_FCI_MENU_CHR, chr, 0, chr.Length);
 
-            MenuImage.makeImage(path, chr, vram, palette);
+            MenuImage.MakeImage(path, chr, vram, palette);
         }
 
         public override string DevInf() {

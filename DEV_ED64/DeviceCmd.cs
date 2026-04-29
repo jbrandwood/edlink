@@ -63,7 +63,7 @@ namespace Edlink.DEV_ED64 {
 
             byte[] vram = new byte[640 * 240 * 2];
             mcmd.VramDump(vram);
-            MenuImage.makeImage(path, vram);
+            MenuImage.MakeImage(path, vram);
 
         }
 
@@ -98,11 +98,11 @@ namespace Edlink.DEV_ED64 {
 
         public override void Dscmd(CmdLine cmd) {
 
-            string scmd = cmd.getStr(Cli.ArgCmd);
+            string scmd = cmd.GetStr(Cli.ArgCmd);
      
             switch (scmd) {
                 case "cicupd":
-                    dev.CicUpd(cmd.getStr(Cli.ArgFile));
+                    dev.CicUpd(cmd.GetStr(Cli.ArgFile));
                     break;
                 default:
                     throw new CmdException(CmdExceptionType.UnknownCmd);

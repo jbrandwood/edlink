@@ -52,7 +52,7 @@ namespace Edlink.DEV_GBA {
             byte[] regs = new byte[1024];
 
             mcmd.VramDump(vram, palette, regs);
-            MenuImage.makeImage(path, vram, palette, regs);
+            MenuImage.MakeImage(path, vram, palette, regs);
         }
 
          public override string DevInf() {

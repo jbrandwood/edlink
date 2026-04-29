@@ -13,22 +13,22 @@ namespace Edlink.DEV_MEGA {
         const int screen_w = 40;//320/8
         const int screen_h = 28;//224/8
 
-        public static void makeImage(string path, byte[] vram, byte[] pal8) {
+        public static void MakeImage(string path, byte[] vram, byte[] pal8) {
 
             
             Bitmap pic = new Bitmap(screen_w * 8, screen_h * 8);
 
-            UInt16[] pal16 = getPal16(pal8);
-            int[] pal32 = getPal32(pal16);
-            UInt16[] plan_a = getPlan(vram, 0xC000);
-            UInt16[] plan_b = getPlan(vram, 0xE000);
+            UInt16[] pal16 = GetPal16(pal8);
+            int[] pal32 = GetPal32(pal16);
+            UInt16[] plan_a = GetPlan(vram, 0xC000);
+            UInt16[] plan_b = GetPlan(vram, 0xE000);
 
 
-            int[] pixels_a = getPixels(vram, plan_a);
-            int[] pixels_b = getPixels(vram, plan_b);
-            int[] shading = getShading(vram);
+            int[] pixels_a = GetPixels(vram, plan_a);
+            int[] pixels_b = GetPixels(vram, plan_b);
+            int[] shading = GetShading(vram);
 
-            renderImg(pic, pal32, pixels_a, pixels_b, shading);
+            RenderImg(pic, pal32, pixels_a, pixels_b, shading);
 
             //Console.WriteLine("path: " + path);
             pic.Save(path);
@@ -38,7 +38,7 @@ namespace Edlink.DEV_MEGA {
 
 
 
-        static int[] getPixels(byte[] vram, UInt16[] tilemap) {
+        static int[] GetPixels(byte[] vram, UInt16[] tilemap) {
 
             int w = screen_w * 8;
             int h = screen_h * 8;
@@ -56,7 +56,7 @@ namespace Edlink.DEV_MEGA {
                 int tile_idx = tilemap[tile_ptr] & 0x7ff;
 
                 //tile_idx = '0';
-                int tile_pixel = getPixel(vram, tile_idx, x, y);
+                int tile_pixel = GetPixel(vram, tile_idx, x, y);
                 if (tile_pixel == 0) {
                     tile_pal = 0;
                 }
@@ -67,7 +67,7 @@ namespace Edlink.DEV_MEGA {
             return pixels;
         }
 
-        public static int getPixel(byte[] vram, int tile_idx, int x, int y) {
+        public static int GetPixel(byte[] vram, int tile_idx, int x, int y) {
             int pixel;
             x %= 8;
             y %= 8;
@@ -83,20 +83,10 @@ namespace Edlink.DEV_MEGA {
             return pixel;
         }
 
-        static UInt16[] getTilemap(byte[] vram) {
+    
 
-            UInt16[] map = new UInt16[screen_w * screen_h];
+        static UInt16[] GetPal16(byte[] pal8) {
 
-            for (int y = 0; y < screen_h; y++) {
-                for (int x = 0; x < screen_w; x++) {
-                    map[x + y * screen_w] = (UInt16)(vram[(x + y * plan_w) * 2 + 0] | (vram[(x + y * plan_w) * 2 + 1] << 8));
-                }
-            }
-
-            return map;
-        }
-
-        static UInt16[] getPal16(byte[] pal8) {
             //File.WriteAllBytes("d:/pal.bin", pal8);
             UInt16[] pal16 = new UInt16[pal8.Length / 2];
 
@@ -108,7 +98,8 @@ namespace Edlink.DEV_MEGA {
             return pal16;
         }
 
-        static int[] getPal32(UInt16[] pal16) {
+        static int[] GetPal32(UInt16[] pal16) {
+
             int[] pal32 = new int[pal16.Length];
             int alpha = 0xff0000;
             alpha <<= 8;
@@ -132,7 +123,7 @@ namespace Edlink.DEV_MEGA {
             return pal32;
         }
 
-        static UInt16[] getPlan(byte[] vram, int offset) {
+        static UInt16[] GetPlan(byte[] vram, int offset) {
 
             UInt16[] map = new UInt16[screen_w * screen_h];
 
@@ -145,7 +136,8 @@ namespace Edlink.DEV_MEGA {
             return map;
         }
 
-        static Sprite[] getSprite(byte[] vram) {
+        static Sprite[] GetSprite(byte[] vram) {
+
             Sprite[] sbuff = new Sprite[256];
             int next = 0;
 
@@ -160,19 +152,21 @@ namespace Edlink.DEV_MEGA {
             return sbuff;
         }
 
-        static int[] getShading(byte[] vram) {
-            Sprite[] sprite = getSprite(vram);
+        static int[] GetShading(byte[] vram) {
+
+            Sprite[] sprite = GetSprite(vram);
             int[] shad_map = new int[screen_w * 8 * screen_h * 8];
 
             for (int i = 0; i < sprite.Length; i++) {
                 if (sprite[i] == null) break;
-                sprite[i].getShadow(vram, shad_map, screen_w * 8);
+                sprite[i].GetShadow(vram, shad_map, screen_w * 8);
             }
 
             return shad_map;
         }
 
-        static int rgbShade(int val) {
+        static int RgbShade(int val) {
+
             int r = (val >> 16) & 0xff;
             int g = (val >> 8) & 0xff;
             int b = (val >> 0) & 0xff;
@@ -184,7 +178,8 @@ namespace Edlink.DEV_MEGA {
             return (0xff << 24) | (r << 16) | (g << 8) | (b << 0);
         }
 
-        static void renderImg(Bitmap pic, int[] pal32, int[] plan_a, int[] plan_b, int[] shading) {
+        static void RenderImg(Bitmap pic, int[] pal32, int[] plan_a, int[] plan_b, int[] shading) {
+
             int w = screen_w * 8;
 
             for (int i = 0; i < plan_a.Length; i++) {
@@ -195,7 +190,7 @@ namespace Edlink.DEV_MEGA {
                 int rgb_b = pal32[plan_b[i]];
 
                 if (shading[i] == 1) {
-                    rgb_b = rgbShade(rgb_b);
+                    rgb_b = RgbShade(rgb_b);
                 }
 
                 int rgb = plan_a[i] == 0 ? rgb_b : rgb_a;

@@ -82,10 +82,10 @@ namespace Edlink.DEV_ED64 {
 
             byte []data = File.ReadAllBytes(path);
 
-            link.txCMD(CMD_DEV, DEV_SCMD_CIC_UPD);
-            link.tx32(data.Length);
-            link.tx8((byte)EpoType.LINK_ACK);
-            link.txDataACK(data, 0, data.Length);
+            link.TxCMD(CMD_DEV, DEV_SCMD_CIC_UPD);
+            link.Tx32(data.Length);
+            link.Tx8((byte)EpoType.LINK_ACK);
+            link.TxDataACK(data, 0, data.Length);
             CheckStatus();
         }
       

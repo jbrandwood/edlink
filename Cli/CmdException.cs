@@ -19,12 +19,12 @@ namespace Edlink {
         string message = "";
 
         public CmdException(CmdExceptionType type) {
-            initMsg(type, "");
+            InitMsg(type, "");
         }
 
         public CmdException(CmdExceptionType type, string msg) {
 
-            initMsg(type, msg);
+            InitMsg(type, msg);
         }
 
         public CmdException(string message) {
@@ -36,7 +36,7 @@ namespace Edlink {
         }
 
 
-        void initMsg(CmdExceptionType type, string msg) {
+        void InitMsg(CmdExceptionType type, string msg) {
 
             switch (type) {
                 case CmdExceptionType.UnknownCmd:

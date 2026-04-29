@@ -12,7 +12,7 @@ namespace Edlink.DEV_ED64 {
         const int screen_w = 640;
         const int screen_h = 240;
 
-        public static void makeImage(string path, byte[] vram) {
+        public static void MakeImage(string path, byte[] vram) {
 
             Bitmap img = new Bitmap(screen_w, screen_h);
 

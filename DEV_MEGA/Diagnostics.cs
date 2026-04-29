@@ -22,27 +22,27 @@ namespace Edlink.DEV_MEGA {
             dev.ExitServiceMode();
 
             if (dev.SIZE_PRG1 > 0) {
-                resp = testMEM("RAM0", DeviceIO.ADDR_PRG1, dev.SIZE_PRG1);
-                printResp(resp);
+                resp = TestMEM("RAM0", DeviceIO.ADDR_PRG1, dev.SIZE_PRG1);
+                PrintResp(resp);
             }
 
             if (dev.SIZE_PRG2 > 0) {
-                resp = testMEM("RAM1", DeviceIO.ADDR_PRG2, dev.SIZE_PRG2);
-                printResp(resp);
+                resp = TestMEM("RAM1", DeviceIO.ADDR_PRG2, dev.SIZE_PRG2);
+                PrintResp(resp);
             }
 
             if (dev.SIZE_SRAM > 0) {
-                resp = testMEM("RAM2", DeviceIO.ADDR_SRAM, dev.SIZE_SRAM);
-                printResp(resp);
+                resp = TestMEM("RAM2", DeviceIO.ADDR_SRAM, dev.SIZE_SRAM);
+                PrintResp(resp);
             }
 
             if (dev.SIZE_BRAM > 0) {
-                resp = testMEM("RAM3", DeviceIO.ADDR_BRAM, dev.SIZE_BRAM);
-                printResp(resp);
+                resp = TestMEM("RAM3", DeviceIO.ADDR_BRAM, dev.SIZE_BRAM);
+                PrintResp(resp);
             }
 
-            resp = testRTC();
-            printResp(resp);
+            resp = TestRTC();
+            PrintResp(resp);
 
             testVDC();
 
@@ -56,10 +56,10 @@ namespace Edlink.DEV_MEGA {
             dev.GetVdc();
             vdc = dev.GetVdc();
 
-            printVDC("Battery ", vdc.bat, 0x250, 0x345);
-            printVDC("VCC 5.0v", vdc.v50, 0x440, 0x510);
-            printVDC("VCC 2.5v", vdc.v25, 0x240, 0x260);
-            printVDC("VCC 1.2v", vdc.v12, 0x110, 0x130);
+            PrintVDC("Battery ", vdc.bat, 0x250, 0x345);
+            PrintVDC("VCC 5.0v", vdc.v50, 0x440, 0x510);
+            PrintVDC("VCC 2.5v", vdc.v25, 0x240, 0x260);
+            PrintVDC("VCC 1.2v", vdc.v12, 0x110, 0x130);
 
         }
 

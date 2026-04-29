@@ -187,6 +187,10 @@ namespace Edlink {
                     base.Dscmd(cmd);
                     break;
 
+                case Cli.CmdNetGame:
+                    base.NetGate(cmd);
+                    break;
+
                 default:
                     throw new CmdException(CmdExceptionType.UnknownCmd);
             }

@@ -28,7 +28,7 @@ namespace Edlink.DEV_ED64 {
             dev.FifoWR("*t");
 
             try {
-                resp = link.rx8();
+                resp = link.Rx8();
             } catch (Exception) {
                 throw new Exception("mcmd: no response from menu");
             }
@@ -55,7 +55,7 @@ namespace Edlink.DEV_ED64 {
         void RunUSB(string path) {
 
             int mode = MenuCmd.MODE_GPAK;
-            byte[] rom = getRom(path);
+            byte[] rom = GetRom(path);
             int entry = GetEntry(mode);
 
             dev.MemWR(entry, rom, 0, rom.Length);
@@ -72,7 +72,7 @@ namespace Edlink.DEV_ED64 {
             dev.FifoTxString(path);
 
 
-            int resp = link.waitResp(7000);
+            int resp = link.WaitResp(7000);
             if (resp != 0) {
                 throw new Exception("mcmd: cmd error: " + resp.ToString("X2"));
             }
@@ -85,7 +85,7 @@ namespace Edlink.DEV_ED64 {
             dev.FifoWR(new byte[] { (byte)mode }, 0, 1);
             dev.FifoTxString(fname);
 
-            int resp = link.rx8();
+            int resp = link.Rx8();
             if (resp != 0) {
                 throw new Exception("mcmd: cmd error: " + resp.ToString("X2"));
             }
@@ -94,17 +94,17 @@ namespace Edlink.DEV_ED64 {
         void SetGpakSize(int size) {
 
             dev.FifoWR("*g");
-            dev.FifoWR(link.num32(size), 0, 4);
+            dev.FifoWR(link.Num32(size), 0, 4);
         }
 
         int GetEntry(int mode) {
 
             dev.FifoWR("*a");
             dev.FifoWR(new byte[] { (byte)mode }, 0, 1);
-            return link.rx32();
+            return link.Rx32();
         }
 
-        byte[] getRom(string path) {
+        byte[] GetRom(string path) {
 
             byte[] rom = File.ReadAllBytes(path);
 
@@ -123,7 +123,7 @@ namespace Edlink.DEV_ED64 {
 
             int dump_addr;
             dev.FifoWR("*v");
-            dump_addr = link.rx32();
+            dump_addr = link.Rx32();
             dev.MemRD(dump_addr, vram, 0, vram.Length);
         }
 
