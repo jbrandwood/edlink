@@ -274,6 +274,7 @@ namespace Edlink.Device {
         }
 
         public string RxString() {
+
             int len = Rx16();
             byte[] buff = new byte[len];
             RxData(buff, 0, buff.Length);

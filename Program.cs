@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -15,26 +16,23 @@ namespace Edlink {
 
         static void Main(string[] args) {
 
+            //args = new string[] { ".help", "--cmd", "fifowr", ".help", "--cmd", "memwr" };
+
+            if (args.Length > 0 && args[0].ToLower().Equals(Cli.CmdMute)) {
+                Console.SetOut(TextWriter.Null);
+            }
+
+
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Console.WriteLine("edlink v" + Assembly.GetEntryAssembly().GetName().Version);
 
-            //Console.WriteLine("zzzz: "+ Path.GetDirectoryName("d:/zelda/biba/pip.bin")); 
-            //args = new string[] { ".link", "--dev-id", "0x18" };
-
-            //args = new string[] { "link", "--dcmd-id", "0x27"};
-            //args = new string[] { "memprint", "--addr", "0xFF00000" };
-            //args = new string[] { "link", "--port", "COM22", "--dcmd-id", "0x27", "--", "memprint", "--addr", "0xFF00000" };
-
-            //args = new string[] { "linkz", "--dcmd-id", "0x27" };
-            //args = new string[] {"setmode", "--mode", "service"};
-
-            //args = new string[] { "mcuupd", "--boot", "xxx.bin",  "--app"};
-
-            //args = new string[] { "devinf"};
-
             long time = DateTime.Now.Ticks;
 
-            CliHandler cmd = null;           
+            CliHandler cmd = null;
+
+            if (args.Length == 0) {
+                Help.Print();
+            }
 
             /*
             Cmd = new CliHandler(args);
@@ -50,7 +48,7 @@ namespace Edlink {
             } catch (Exception x) {
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("");
-                Console.WriteLine("ERROR: " + x.Message);
+                Console.Error.WriteLine("ERROR: " + x.Message);
                 Console.ResetColor();
             }
 
@@ -60,6 +58,8 @@ namespace Edlink {
 
             time = (DateTime.Now.Ticks - time) / 10000;
             Console.WriteLine("Exec time: " + time);
+
+            
         }
 
     }

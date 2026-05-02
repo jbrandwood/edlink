@@ -87,6 +87,7 @@
     <Compile Include="DEV_TED\Diagnostics.cs" />
     <Compile Include="DEV_TED\MenuCmd.cs" />
     <Compile Include="DEV_TED\MenuImage.cs" />
+    <Compile Include="Help.cs" />
     <Compile Include="NetGate.cs" />
     <Compile Include="NtpTime.cs" />
     <Compile Include="Program.cs" />

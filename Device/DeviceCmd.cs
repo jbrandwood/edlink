@@ -61,6 +61,11 @@ namespace Edlink.Device {
             return len;
         }
 
+        public int FifoWR(byte[] buff, int offset, int len) {
+            dev.FifoWR(buff, offset, len);
+            return len;
+        }
+
         public virtual void FpgaInit(string path) {
 
             if (Link.IsDevPath(path)) {
@@ -132,7 +137,7 @@ namespace Edlink.Device {
 
         public virtual string RtcCalSet(int ppm_val) {
 
-           
+
             dev.RtcCalSet(ppm_val);
 
             int resp = dev.RtcCal(DateTime.Now, 3);//read back calib val
@@ -185,7 +190,8 @@ namespace Edlink.Device {
         }
 
         public virtual void NetGate(CmdLine cmd) {
-            Edlink.NetGate.Start(dev);
+            NetGate ng = new NetGate(dev);
+            ng.Start();
         }
 
         protected string AppDeploy(string rom_path, string fpga_path) {

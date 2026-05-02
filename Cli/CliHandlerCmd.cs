@@ -1,6 +1,7 @@
 ﻿using Edlink.Device;
 using System;
 using System.Collections.Generic;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -63,7 +64,7 @@ namespace Edlink {
             dcmd.MemRD(addr, buff, 0, len);
 
             if (path != null) {
-                File.WriteAllBytes(path, buff);
+                FileWrite(path, buff);
             }
 
             CmdEnd("ok");
@@ -98,16 +99,17 @@ namespace Edlink {
             int addr = cmd.GetInt(Cli.ArgAddr);
             int len;
             int offset = 0;
+            bool use_stdin = path.Equals("-");
 
-            byte[] buff = File.ReadAllBytes(path);
-
-            if (cmd.HasArg(Cli.ArgLen)) {
+            if (cmd.HasArg(Cli.ArgLen) || use_stdin) {
                 len = cmd.GetInt(Cli.ArgLen);
             } else {
-                len = buff.Length;
+                len = (int)new FileInfo(path).Length;
             }
 
-            if (cmd.HasArg(Cli.ArgOffset)) {
+            byte[] buff = FileRead(path, len);
+
+            if (cmd.HasArg(Cli.ArgOffset) && !use_stdin) {
                 offset = cmd.GetInt(Cli.ArgOffset);
             }
 
@@ -127,7 +129,7 @@ namespace Edlink {
             byte[] buff = new byte[len];
             dcmd.FlaRD(addr, buff, 0, len);
 
-            File.WriteAllBytes(path, buff);
+            FileWrite(path, buff);
 
             CmdEnd("ok");
         }
@@ -159,7 +161,7 @@ namespace Edlink {
                 block = Math.Min(block, 0x10000 - addr % 0x10000);
 
                 dcmd.FlaWR(addr, buff, offset, block);
-                cmdProgress();
+                CmdProgress();
                 len -= block;
                 addr += block;
                 offset += block;
@@ -172,7 +174,7 @@ namespace Edlink {
 
             CmdStart(cmd, "\n");
 
-            FileStream fs = null;
+            Stream fs = null;
             bool print;
             int len = 0;
             int byte_ctr = 0;
@@ -185,8 +187,14 @@ namespace Edlink {
             }
 
             if (cmd.HasArg(Cli.ArgFile) || !print) {
-                fs = new FileStream(cmd.GetStr(Cli.ArgFile), FileMode.Create, FileAccess.Write);
+                string path = cmd.GetStr(Cli.ArgFile);
+                if (path.Equals("-")) {
+                    fs = Console.OpenStandardOutput();
+                } else {
+                    fs = new FileStream(cmd.GetStr(Cli.ArgFile), FileMode.Create, FileAccess.Write);
+                }
             }
+
 
             if (print) {
                 Console.WriteLine("Press CTRL+Q to exit");
@@ -253,6 +261,32 @@ namespace Edlink {
             }
 
             Console.WriteLine();
+        }
+
+        protected void FifoWR(CmdLine cmd) {
+
+            CmdStart(cmd, "fifo write...");
+
+            string path = cmd.GetStr(Cli.ArgFile);
+            int len;
+            int offset = 0;
+            bool use_stdin = path.Equals("-");
+
+            if (cmd.HasArg(Cli.ArgLen) || use_stdin) {
+                len = cmd.GetInt(Cli.ArgLen);
+            } else {
+                len = (int)new FileInfo(path).Length;
+            }
+
+            byte[] buff = FileRead(path, len);
+
+            if (cmd.HasArg(Cli.ArgOffset) && !use_stdin) {
+                offset = cmd.GetInt(Cli.ArgOffset);
+            }
+
+            dcmd.FifoWR(buff, offset, len);
+
+            CmdEnd("ok");
         }
 
         protected void Reset(CmdLine cmd) {
@@ -355,7 +389,7 @@ namespace Edlink {
             CmdStart(cmd, "usb speed test...\n");
 
             int addr = 0;
-            int len = 0x100000;
+            int len = 0x200000;
 
             if (cmd.HasArg(Cli.ArgAddr)) {
                 addr = cmd.GetInt(Cli.ArgAddr);
@@ -476,8 +510,38 @@ namespace Edlink {
             Console.WriteLine(msg);
         }
 
-        void cmdProgress() {
+        void CmdProgress() {
             Console.Write(".");
+        }
+
+        byte[] FileRead(string path, int len) {
+
+            if (path.Equals("-")) {
+
+                byte[] buff = new byte[len];
+                Stream s = Console.OpenStandardInput();
+
+                for (int i = 0; i < len;) {
+                    i += s.Read(buff, i, len - i);
+                }
+
+                s.Close();
+                return buff;
+
+            } else {
+                return File.ReadAllBytes(path);
+            }
+        }
+
+        void FileWrite(string path, byte[] data) {
+
+            if (path.Equals("-")) {
+                Stream s = Console.OpenStandardOutput();
+                s.Write(data, 0, data.Length);
+                s.Close();
+            } else {
+                File.WriteAllBytes(path, data);
+            }
         }
     }
 }

@@ -62,6 +62,16 @@ namespace Edlink {
                     base.LinkConfig(cmd_list[i], link);
                     continue;
                 }
+
+                if (cmd_list[i].Name.Equals(Cli.CmdMute)) {
+                    Console.SetOut(TextWriter.Null);
+                    continue;
+                }
+
+                if (cmd_list[i].Name.Equals(Cli.CmdHelp)) {
+                    Help.Print(cmd_list[i].GetStr(Cli.ArgCmd));
+                    continue;
+                }
             }
 
             bool set_def_mode = true;
@@ -131,6 +141,14 @@ namespace Edlink {
                     base.FlaWR(cmd);
                     break;
 
+                case Cli.CmdUsbRd:
+                    base.UsbRD(cmd);
+                    break;
+
+                case Cli.CmdFifoWr:
+                    base.FifoWR(cmd);
+                    break;
+
                 case Cli.CmdReset:
                     base.Reset(cmd);
                     break;
@@ -169,10 +187,6 @@ namespace Edlink {
 
                 case Cli.CmdDevInf:
                     base.DevInf(cmd);
-                    break;
-
-                case Cli.CmdUsbRd:
-                    base.UsbRD(cmd);
                     break;
 
                 case Cli.CmdScreen:

@@ -28,12 +28,16 @@ namespace Edlink {
 
 
         public const string CmdLink = ".link";
+        public const string CmdMute = ".mute";
+        public const string CmdHelp = ".help";
         public const string CmdRun = "run";
         public const string CmdMcuMode = "mcumode";
         public const string CmdMemRd = "memrd";
         public const string CmdMemWr = "memwr";
         public const string CmdFlaRd = "flard";
         public const string CmdFlaWr = "flawr";
+        public const string CmdUsbRd = "usbrd";
+        public const string CmdFifoWr = "fifowr";
         public const string CmdReset = "reset";
         public const string CmdFpga = "fpga";
         public const string CmdCp = "cp";
@@ -44,7 +48,6 @@ namespace Edlink {
         public const string CmdUsbSpd = "usbspd";
         public const string CmdDevInf = "devinf";
         public const string CmdScreen = "screen";
-        public const string CmdUsbRd = "usbrd";
         public const string CmdDiag = "diag";
         public const string CmdDscmd = "dscmd";//       device specific cmd
         public const string CmdNetGame = "netgate";//
