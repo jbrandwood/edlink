@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace Edlink {
     internal class Cli {
 
-        public const string NewCmd = "--";
 
         public const string ArgPrefix = "--";
         public const string ArgFile = "--file";

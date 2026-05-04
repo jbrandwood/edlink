@@ -29,9 +29,6 @@ namespace Edlink {
 
                 string val = args[i];
 
-                if (val.Trim().Equals(Cli.NewCmd)) {
-                    break;
-                }
 
                 if (val.StartsWith(Cli.ArgPrefix) || i == offset) {
                     //fixed format for arg and Cmd names
@@ -94,10 +91,6 @@ namespace Edlink {
 
             for (int i = 0; i < args.Length;) {
 
-                if (args[i].Trim().Equals(Cli.NewCmd)) {
-                    i++;
-                    continue;
-                }
 
                 CmdLine c = new CmdLine(args, i);
 

@@ -188,8 +188,6 @@ namespace Edlink {
             bool print;
             int len = -1;
             int timeout_ms = -1;
-            int byte_ctr = 0;
-            int bytes_ctr_old = -1;
             bool stdout = false;
 
             var sw = Stopwatch.StartNew();
@@ -221,7 +219,7 @@ namespace Edlink {
             }
 
             if (stdio_mode && timeout_ms < 0) {
-                //Note: In stdio mode, UsbRD must not be used without a timeout.
+                //In stdio mode, UsbRD must not be used without a timeout.
                 //If no timeout is specified, edlink may remain running after the 
                 //master application exits, potentially blocking access to the USB port.
                 timeout_ms = 1000;
@@ -246,22 +244,12 @@ namespace Edlink {
                     block = Math.Min(block, len);
                 }
                 block = dcmd.UsbRD(buff, 0, block);
-                byte_ctr += block;
 
-                if (!stdout && !print && byte_ctr != bytes_ctr_old) {
-                    int console_base = Console.CursorTop;
-                    Console.CursorLeft = 0;
-                    Tools.Print("bytes recived: " + byte_ctr, inf_color);
-                    bytes_ctr_old = byte_ctr;
-                    Console.CursorTop = console_base;
-                }
 
                 if (block == 0) {
 
-                    if (timeout_ms < 0) {
-                        //timeout off
-                        Thread.Sleep(1);
-                    } else if (sw.ElapsedMilliseconds > timeout_ms) {
+                    if (sw.ElapsedMilliseconds > timeout_ms && timeout_ms >= 0) {
+
                         if (len < 0) {
                             break;
                         } else {
@@ -295,7 +283,7 @@ namespace Edlink {
                 fs.Close();
             }
 
-            if (len < 0 && stdio_mode) {
+            if (len < 0 && stdio_mode && stdout) {
                 Stdio.Write(Stdio.Dash, buff, 0, 0);
             }
 
