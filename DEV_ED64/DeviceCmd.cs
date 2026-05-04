@@ -47,14 +47,14 @@ namespace Edlink.DEV_ED64 {
 
         public override void McuApp(string path) {
 
-            byte[] buff = File.ReadAllBytes(path);
+            byte[] buff = Stdio.Read(path);
             //dev.EnterServiceMode();
             dev.McuAppLoad(buff);
         }
 
         public override void McuBoot(string path) {
 
-            byte[] buff = File.ReadAllBytes(path);
+            byte[] buff = Stdio.Read(path);
             dev.ExitServiceMode();
             dev.McuBootInstall(buff);
         }

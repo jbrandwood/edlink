@@ -1,10 +1,13 @@
 ﻿using Edlink.Device;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,12 +22,19 @@ namespace Edlink {
         protected DeviceCmd dcmd;
         const ConsoleColor inf_color = ConsoleColor.Green;
 
+        protected bool stdio_mode = false;
+
         protected void McuMode(CmdLine cmd) {
 
             string mode = cmd.GetStr(Cli.ArgMode);
             CmdStart(cmd, "set mode: " + mode + "...");
             dcmd.McuMode(mode);
             CmdEnd("ok");
+        }
+
+        protected void StdioConfig(CmdLine cmd) {
+            Console.SetOut(TextWriter.Null);
+            stdio_mode = true;
         }
 
         protected void LinkConfig(CmdLine cmd, Link link) {//move to Cmd base
@@ -64,7 +74,7 @@ namespace Edlink {
             dcmd.MemRD(addr, buff, 0, len);
 
             if (path != null) {
-                FileWrite(path, buff);
+                Stdio.Write(path, buff);
             }
 
             CmdEnd("ok");
@@ -99,17 +109,15 @@ namespace Edlink {
             int addr = cmd.GetInt(Cli.ArgAddr);
             int len;
             int offset = 0;
-            bool use_stdin = path.Equals("-");
 
-            if (cmd.HasArg(Cli.ArgLen) || use_stdin) {
+            byte[] buff = Stdio.Read(path);
+
+            if (cmd.HasArg(Cli.ArgLen)) {
                 len = cmd.GetInt(Cli.ArgLen);
             } else {
-                len = (int)new FileInfo(path).Length;
+                len = buff.Length;
             }
-
-            byte[] buff = FileRead(path, len);
-
-            if (cmd.HasArg(Cli.ArgOffset) && !use_stdin) {
+            if (cmd.HasArg(Cli.ArgOffset)) {
                 offset = cmd.GetInt(Cli.ArgOffset);
             }
 
@@ -129,7 +137,7 @@ namespace Edlink {
             byte[] buff = new byte[len];
             dcmd.FlaRD(addr, buff, 0, len);
 
-            FileWrite(path, buff);
+            Stdio.Write(path, buff);
 
             CmdEnd("ok");
         }
@@ -143,7 +151,7 @@ namespace Edlink {
             int len;
             int offset = 0;
 
-            byte[] buff = File.ReadAllBytes(path);
+            byte[] buff = Stdio.Read(path);
 
             if (cmd.HasArg(Cli.ArgLen)) {
                 len = cmd.GetInt(Cli.ArgLen);
@@ -170,15 +178,21 @@ namespace Edlink {
             CmdEnd("ok");
         }
 
+
         protected void UsbRD(CmdLine cmd) {
 
             CmdStart(cmd, "\n");
 
+            byte[] buff = new byte[1024];
             Stream fs = null;
             bool print;
-            int len = 0;
+            int len = -1;
+            int timeout_ms = -1;
             int byte_ctr = 0;
             int bytes_ctr_old = -1;
+            bool stdout = false;
+
+            var sw = Stopwatch.StartNew();
 
             print = cmd.HasArg(Cli.ArgPrint);
 
@@ -186,25 +200,34 @@ namespace Edlink {
                 len = cmd.GetInt(Cli.ArgLen);
             }
 
-            if (cmd.HasArg(Cli.ArgFile) || !print) {
-                string path = cmd.GetStr(Cli.ArgFile);
-                if (path.Equals("-")) {
-                    fs = Console.OpenStandardOutput();
-                } else {
-                    fs = new FileStream(cmd.GetStr(Cli.ArgFile), FileMode.Create, FileAccess.Write);
-                }
+            if (cmd.HasArg(Cli.ArgTout)) {
+                timeout_ms = cmd.GetInt(Cli.ArgTout);
             }
 
+            if (cmd.HasArg(Cli.ArgFile) || !print) {
+
+                string path = cmd.GetStr(Cli.ArgFile);
+
+                if (path.Equals(Stdio.Dash)) {
+                    stdout = true;
+                } else {
+                    fs = new FileStream(path, FileMode.Create, FileAccess.Write);
+                }
+            }
 
             if (print) {
                 Console.WriteLine("Press CTRL+Q to exit");
                 Console.WriteLine("Press CTRL+X to clear console");
             }
 
-            byte[] buff = new byte[1024];
-            int console_base = Console.CursorTop;
+            if (stdio_mode && timeout_ms < 0) {
+                //Note: In stdio mode, UsbRD must not be used without a timeout.
+                //If no timeout is specified, edlink may remain running after the 
+                //master application exits, potentially blocking access to the USB port.
+                timeout_ms = 1000;
+            }
 
-            while (true) {
+            while (len != 0) {
 
                 if (print && Console.KeyAvailable) {
 
@@ -219,22 +242,36 @@ namespace Edlink {
                 }
 
                 int block = buff.Length;
-                if (len != 0) {
+                if (len > 0) {
                     block = Math.Min(block, len);
                 }
                 block = dcmd.UsbRD(buff, 0, block);
                 byte_ctr += block;
 
-                if (!print && byte_ctr != bytes_ctr_old) {
+                if (!stdout && !print && byte_ctr != bytes_ctr_old) {
+                    int console_base = Console.CursorTop;
                     Console.CursorLeft = 0;
-                    Console.CursorTop = console_base;
                     Tools.Print("bytes recived: " + byte_ctr, inf_color);
                     bytes_ctr_old = byte_ctr;
+                    Console.CursorTop = console_base;
                 }
 
                 if (block == 0) {
-                    Thread.Sleep(1);
+
+                    if (timeout_ms < 0) {
+                        //timeout off
+                        Thread.Sleep(1);
+                    } else if (sw.ElapsedMilliseconds > timeout_ms) {
+                        if (len < 0) {
+                            break;
+                        } else {
+                            throw new Exception("usb rd timeout");
+                        }
+                    }
                     continue;
+
+                } else {
+                    sw = Stopwatch.StartNew();
                 }
 
                 if (print) {
@@ -242,25 +279,28 @@ namespace Edlink {
                     Tools.Print(msg, inf_color);
                 }
 
-                if (fs != null) {
+                if (stdout) {
+                    Stdio.Write(Stdio.Dash, buff, 0, block);
+                } else if (fs != null) {
                     fs.Write(buff, 0, block);
                     fs.Flush();
                 }
 
-                if (len != 0) {
+                if (len > 0) {
                     len -= block;
-                    if (len <= 0) {
-                        break;
-                    }
                 }
-
             }
 
             if (fs != null) {
                 fs.Close();
             }
 
+            if (len < 0 && stdio_mode) {
+                Stdio.Write(Stdio.Dash, buff, 0, 0);
+            }
+
             Console.WriteLine();
+
         }
 
         protected void FifoWR(CmdLine cmd) {
@@ -270,17 +310,16 @@ namespace Edlink {
             string path = cmd.GetStr(Cli.ArgFile);
             int len;
             int offset = 0;
-            bool use_stdin = path.Equals("-");
 
-            if (cmd.HasArg(Cli.ArgLen) || use_stdin) {
+            byte[] buff = Stdio.Read(path);
+
+            if (cmd.HasArg(Cli.ArgLen)) {
                 len = cmd.GetInt(Cli.ArgLen);
             } else {
-                len = (int)new FileInfo(path).Length;
+                len = buff.Length;
             }
 
-            byte[] buff = FileRead(path, len);
-
-            if (cmd.HasArg(Cli.ArgOffset) && !use_stdin) {
+            if (cmd.HasArg(Cli.ArgOffset)) {
                 offset = cmd.GetInt(Cli.ArgOffset);
             }
 
@@ -332,7 +371,9 @@ namespace Edlink {
             string src = cmd.GetStr(Cli.ArgSrc);
             string dst = cmd.GetStr(Cli.ArgDst);
 
-            if (!Link.IsDevPath(src) && File.GetAttributes(src).HasFlag(FileAttributes.Directory)) {
+            if (!Link.IsDevPath(src) &&
+                !src.Equals(Stdio.Dash) &&
+                File.GetAttributes(src).HasFlag(FileAttributes.Directory)) {
                 CopyDir(cmd, src, dst);
             } else {
                 CopyFile(cmd, src, dst);
@@ -432,7 +473,7 @@ namespace Edlink {
             Tools.PrintLine(msg, inf_color);
 
             if (cmd.HasArg(Cli.ArgFile)) {
-                File.WriteAllText(cmd.GetStr(Cli.ArgFile), msg);
+                Stdio.Write(cmd.GetStr(Cli.ArgFile), msg);
             }
         }
 
@@ -477,6 +518,10 @@ namespace Edlink {
             CmdStart(cmd, "\n");
             dcmd.NetGate(cmd);
         }
+
+        protected void Exit(CmdLine cmd) {
+            stdio_mode = false;
+        }
         //************************************************************************************************ 
         void CopyFile(CmdLine cmd, string src, string dst) {
 
@@ -514,34 +559,5 @@ namespace Edlink {
             Console.Write(".");
         }
 
-        byte[] FileRead(string path, int len) {
-
-            if (path.Equals("-")) {
-
-                byte[] buff = new byte[len];
-                Stream s = Console.OpenStandardInput();
-
-                for (int i = 0; i < len;) {
-                    i += s.Read(buff, i, len - i);
-                }
-
-                s.Close();
-                return buff;
-
-            } else {
-                return File.ReadAllBytes(path);
-            }
-        }
-
-        void FileWrite(string path, byte[] data) {
-
-            if (path.Equals("-")) {
-                Stream s = Console.OpenStandardOutput();
-                s.Write(data, 0, data.Length);
-                s.Close();
-            } else {
-                File.WriteAllBytes(path, data);
-            }
-        }
     }
 }

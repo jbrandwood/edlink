@@ -75,6 +75,7 @@ namespace Edlink.DEV_ED64 {
             int resp = link.WaitResp(7000);
             if (resp != 0) {
                 throw new Exception("mcmd: cmd error: " + resp.ToString("X2"));
+                //throw new Exception("mcmd: cmd error: " + path);
             }
         }
 
@@ -106,7 +107,7 @@ namespace Edlink.DEV_ED64 {
 
         byte[] GetRom(string path) {
 
-            byte[] rom = File.ReadAllBytes(path);
+            byte[] rom = Stdio.Read(path);
 
             if (rom[1] == 0x80) {
                 for (int i = 0; i < rom.Length; i += 2) {

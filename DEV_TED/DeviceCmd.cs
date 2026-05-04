@@ -63,7 +63,7 @@ namespace Edlink.DEV_TED {
 
         public override void McuApp(string path) {
 
-            byte[] buff = File.ReadAllBytes(path);
+            byte[] buff = Stdio.Read(path);
             dev.McuAppLoad(buff);
         }
 

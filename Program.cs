@@ -18,7 +18,8 @@ namespace Edlink {
 
             //args = new string[] { ".help", "--cmd", "fifowr", ".help", "--cmd", "memwr" };
 
-            if (args.Length > 0 && args[0].ToLower().Equals(Cli.CmdMute)) {
+
+            if (args.Length > 0 && args[0].ToLower().Equals(Cli.CmdStdio)) {
                 Console.SetOut(TextWriter.Null);
             }
 

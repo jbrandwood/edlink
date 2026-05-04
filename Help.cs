@@ -37,17 +37,20 @@ Note:
 "
 },
 
-new[] { Cli.CmdMute,"disable console output",
+new[] { Cli.CmdStdio,"stdio mode",
 @"
 Syntax:
-  edlink .mute
+  edlink .stdio
 
 Description:
-  Disables console output to allow binary data exchange via stdout
-  with another program.
+  Disables console output and switches to stdio mode, allowing commands
+  to be sent via stdin.
 
 Examples:
-  edlink .mute
+  edlink .stdio
+
+Note:
+  Intended for integration with other programs controlling edlink via stdio.
 "
 },
 
@@ -148,12 +151,11 @@ Description:
 
 Examples:
   edlink fifowr --file data.bin
-  edlink fifowr --file - --len 512
+  edlink fifowr --file -
   edlink fifowr --file data.bin --offset 0x100 --len 512
 
 Note:
   ""--file -"" reads data from stdin.
-  --len is required when using stdin.
 "
 },
 
@@ -278,12 +280,11 @@ Description:
 
 Examples:
   edlink memwr --addr 0x00000000 --file data.bin
-  edlink memwr --addr 0x00000000 --file - --len 512
+  edlink memwr --addr 0x00000000 --file -
   edlink memwr --addr 0x00000000 --file data.bin --offset 0x100 --len 0x200
 
 Note:
   ""--file -"" reads data from stdin.
-  --len is required when using stdin.
 "
 },
 
@@ -424,7 +425,8 @@ Syntax:
   edlink usbrd [--len <value>] [--file <path>] [--print]
 
 Arguments:
-  --len    optional, data length (0 = unlimited)
+  --len    optional, data length (-1 = unlimited)
+  --tout   optional, timeout in ms (-1 = disabled)
   --file   optional, output file
   --print  optional, print as UTF-8 text
 
@@ -436,11 +438,13 @@ Examples:
   edlink usbrd --print
   edlink usbrd --len 512 --file dump.bin
   edlink usbrd --file -
+  edlink usbrd --len -1 --tout 1000 --print
 
 Note:
   At least one of --file or --print must be specified.
   If both are set, data is printed and saved.
-  If --len is 0 or not set, reception continues until interrupted.
+  If --len is -1 or not set, reception continues until interrupted.
+  If --tout is -1 or not set, timeout is disabled.
   ""--file -"" redirects raw data to stdout.
 "
 },

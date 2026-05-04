@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -8,7 +9,8 @@ using System.Threading.Tasks;
 namespace Edlink {
     internal class Tools {
 
-        public static string VdcToStr(int vdc) {
+        
+         public static string VdcToStr(int vdc) {
 
 
             return (vdc >> 8).ToString("X2") + "." + (vdc & 0xff).ToString("X2");
@@ -94,7 +96,6 @@ namespace Edlink {
             }
             return (val / 10 << 4) | val % 10;
         }
-        
 
     }
 

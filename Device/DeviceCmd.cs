@@ -71,12 +71,11 @@ namespace Edlink.Device {
             if (Link.IsDevPath(path)) {
                 dev.FpgInit(Link.GetDevPath(path));
             } else {
-                dev.FpgInit(File.ReadAllBytes(path));
+                dev.FpgInit(Stdio.Read(path));
             }
         }
 
         public virtual void FileCopy(string src, string dst) {
-
 
             byte[] buff;
 
@@ -86,7 +85,7 @@ namespace Edlink.Device {
                 dev.FileRead(buff, 0, buff.Length);
                 dev.FileClose();
             } else {
-                buff = File.ReadAllBytes(src);
+                buff = Stdio.Read(src);
             }
 
             if (Link.IsDevPath(dst)) {
@@ -94,7 +93,7 @@ namespace Edlink.Device {
                 dev.FileWrite(buff, 0, buff.Length);
                 dev.FileClose();
             } else {
-                File.WriteAllBytes(dst, buff);
+                Stdio.Write(dst, buff);
             }
 
         }

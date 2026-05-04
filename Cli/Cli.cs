@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Security.Permissions;
 using System.Text;
@@ -25,10 +26,11 @@ namespace Edlink {
         public const string ArgProtId = "--protocol-id";
         public const string ArgVal = "--val";
         public const string ArgCmd = "--cmd";// sub commands
+        public const string ArgTout = "--tout";
 
 
         public const string CmdLink = ".link";
-        public const string CmdMute = ".mute";
+        public const string CmdStdio = ".stdio";
         public const string CmdHelp = ".help";
         public const string CmdRun = "run";
         public const string CmdMcuMode = "mcumode";
@@ -50,7 +52,8 @@ namespace Edlink {
         public const string CmdScreen = "screen";
         public const string CmdDiag = "diag";
         public const string CmdDscmd = "dscmd";//       device specific cmd
-        public const string CmdNetGame = "netgate";//
+        public const string CmdNetGame = "netgate";
+        public const string CmdExit = "exit";
 
         //ArgMode
         public const string ModeApp = "app";

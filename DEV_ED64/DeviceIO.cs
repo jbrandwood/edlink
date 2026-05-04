@@ -80,7 +80,7 @@ namespace Edlink.DEV_ED64 {
 
         internal void CicUpd(string path) {
 
-            byte []data = File.ReadAllBytes(path);
+            byte []data = Stdio.Read(path);
 
             link.TxCMD(CMD_DEV, DEV_SCMD_CIC_UPD);
             link.Tx32(data.Length);

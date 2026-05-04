@@ -87,7 +87,7 @@ namespace Edlink.DEV_MEGA {
 
         static UInt16[] GetPal16(byte[] pal8) {
 
-            //File.WriteAllBytes("d:/pal.bin", pal8);
+            //File.Write("d:/pal.bin", pal8);
             UInt16[] pal16 = new UInt16[pal8.Length / 2];
 
             for (int i = 0; i < pal16.Length; i++) {

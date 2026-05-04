@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Edlink.Device;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web;
-using Edlink.Device;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace Edlink {
@@ -26,6 +28,10 @@ namespace Edlink {
             Configure();
             OpenDevice();
             CmdExec();
+            while (base.stdio_mode) {
+                cmd_list = CmdLine.Parse(ParseArgs(Stdio.ReadLine()));
+                CmdExec();
+            }
             Stop();
         }
 
@@ -40,6 +46,25 @@ namespace Edlink {
         }
 
         //************************************************************************************************
+        string[] ParseArgs(string input) {
+
+            MatchCollection matches = Regex.Matches(input, @"[\""].+?[\""]|[^ ]+");
+
+            List<string> result = new List<string>();
+
+            foreach (Match match in matches) {
+                string value = match.Value;
+
+                // убрать кавычки
+                if (value.StartsWith("\"") && value.EndsWith("\"")) {
+                    value = value.Substring(1, value.Length - 2);
+                }
+
+                result.Add(value);
+            }
+
+            return result.ToArray();
+        }
         void OpenDevice() {
 
             link.Open();
@@ -63,8 +88,10 @@ namespace Edlink {
                     continue;
                 }
 
-                if (cmd_list[i].Name.Equals(Cli.CmdMute)) {
-                    Console.SetOut(TextWriter.Null);
+                if (cmd_list[i].Name.Equals(Cli.CmdStdio)) {
+
+                    base.StdioConfig(cmd_list[i]);
+                   
                     continue;
                 }
 
@@ -72,6 +99,7 @@ namespace Edlink {
                     Help.Print(cmd_list[i].GetStr(Cli.ArgCmd));
                     continue;
                 }
+
             }
 
             bool set_def_mode = true;
@@ -203,6 +231,10 @@ namespace Edlink {
 
                 case Cli.CmdNetGame:
                     base.NetGate(cmd);
+                    break;
+
+                case Cli.CmdExit:
+                    base.Exit(cmd);
                     break;
 
                 default:
