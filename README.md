@@ -19,5 +19,6 @@ If edlink cannot connect to the cartridge, firmware update may be required.
 
 | Path | Description |
 |---|---|
+| `/dist` | Release builds. |
 | `/edlink` | Edlink source code. |
 | `/samples` | Command examples and third-party integration examples. |
