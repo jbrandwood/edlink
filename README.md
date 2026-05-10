@@ -13,6 +13,8 @@ Compared to previous USB utilities, functionality has been significantly expande
 Edlink is also a good reference for cartridge communication on the console side.  
 Console applications use the same command interface as USB communication, but through a FIFO port mapped into the CPU address space.
 
+If edlink cannot connect to the cartridge, firmware update may be required.
+
 ## Contents
 
 | Path | Description |
