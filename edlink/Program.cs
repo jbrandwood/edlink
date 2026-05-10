@@ -28,12 +28,6 @@ namespace Edlink {
                 Help.Print();
             }
 
-            /*
-            Cmd = new CliHandler(args);
-            Cmd.Start();
-            Cmd.Stop();
-            Cmd = null;
-            return;*/
 
             try {
                 cmd = new CliHandler(args);
