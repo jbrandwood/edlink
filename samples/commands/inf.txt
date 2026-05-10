@@ -1,0 +1,16 @@
+device id : 27
+name      : EverDrive-64 PRO
+serial    : 0005B29D.0000000A
+build date: 24.04.2026
+bootloader: 26.0509
+firmware  : 26.0509
+cic       : 26.0428
+flash size: 8MB
+rtc calib : 53
+rom size  : 126MB
+game ctr  : 1
+boot ctr  : 38
+battery   : 03.23
+vcc 3.3   : 03.24
+vcc 2.5   : 02.50
+vcc 1.2   : 01.21

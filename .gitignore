@@ -1,17 +1,11 @@
 *.bak
 *.o
-*.drc
 *.deb
 *.qws
-iceCube*.log
-accel_uc.log
 db
-output_files
 incremental_db
 .vs
 obj
 build
-History
-Project Logs*
-__Previews
-*-backups
+nbproject
+usb-cmd
