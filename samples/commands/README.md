@@ -8,6 +8,7 @@
 | `cp dir.bat` | Copies `rtc-cal` folder to cartridge SD card. |
 | `cp file.bat` | Copies a file to cartridge SD card. |
 | `devinf.bat` | Prints cartridge information and saves it to `inf.txt`. |
+| `diag.bat` | Runs basic cartridge hardware diagnostics. |
 | `flard.bat` | Reads 4KB from cartridge system flash memory and saves it to `dump.bin`. |
 | `memrd file.bat` | Reads 256 bytes from cartridge ROM memory and saves them to `dump.bin`. |
 | `memrd print.bat` | Reads 128 bytes from cartridge ROM memory and prints them as hexadecimal dump. |
