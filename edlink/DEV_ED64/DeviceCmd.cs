@@ -54,6 +54,7 @@ namespace Edlink.DEV_ED64 {
             dev.McuBootInstall(buff);
         }
 
+#if WINDOWS
         public override void Screen(string path) {
 
             byte[] vram = new byte[640 * 240 * 2];
@@ -61,6 +62,7 @@ namespace Edlink.DEV_ED64 {
             MenuImage.MakeImage(path, vram);
 
         }
+#endif
 
         public override string DevInf() {
 

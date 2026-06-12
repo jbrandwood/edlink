@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworks>net8.0;net8.0-windows</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>Edlink</RootNamespace>
-    <TargetFramework>net8.0</TargetFramework>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <WarningLevel>4</WarningLevel>
     <ApplicationIcon>ed.ico</ApplicationIcon>
@@ -18,7 +17,7 @@
     <Content Include="ed.ico" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="8.0.28" />
-    <PackageReference Include="System.IO.Ports" Version="8.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="10.0.9" Condition="$(TargetFramework.EndsWith('windows'))" />
+    <PackageReference Include="System.IO.Ports" Version="10.0.9" />
   </ItemGroup>
 </Project>

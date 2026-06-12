@@ -63,6 +63,7 @@ namespace Edlink.DEV_TED {
         }
 
 
+#if WINDOWS
         public override void Screen(string path) {
 
             byte[] vram = new byte[0x10000];
@@ -71,6 +72,7 @@ namespace Edlink.DEV_TED {
             mcmd.VramDump(vram, palette);
             MenuImage.MakeImage(path, vram, palette);
         }
+#endif
 
         public override string DevInf() {
 

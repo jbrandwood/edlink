@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if WINDOWS
+using System;
 
 
 namespace Edlink.DEV_GBA {
@@ -215,3 +216,4 @@ namespace Edlink.DEV_GBA {
 
     }
 }
+#endif

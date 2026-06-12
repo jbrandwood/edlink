@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if WINDOWS
+using System;
 
 
 namespace Edlink.DEV_EDN8 {
@@ -131,3 +132,4 @@ namespace Edlink.DEV_EDN8 {
         }
     }
 }
+#endif

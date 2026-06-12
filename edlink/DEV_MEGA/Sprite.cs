@@ -37,6 +37,7 @@ namespace Edlink.DEV_MEGA {
             get { return next_tile; }
         }
 
+#if WINDOWS
         public void GetShadow(byte[] vram, int[] shad_map, int screen_w) {
 
             int pw = spr_w * 8;
@@ -57,5 +58,6 @@ namespace Edlink.DEV_MEGA {
             }
 
         }
+#endif
     }
 }

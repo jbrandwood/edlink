@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if WINDOWS
+using System;
 
 
 namespace Edlink.DEV_TED {
@@ -107,3 +108,4 @@ namespace Edlink.DEV_TED {
         }
     }
 }
+#endif

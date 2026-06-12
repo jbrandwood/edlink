@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if WINDOWS
+using System;
 
 
 namespace Edlink.DEV_MEGA {
@@ -195,3 +196,4 @@ namespace Edlink.DEV_MEGA {
         }
     }
 }
+#endif

@@ -71,6 +71,7 @@ namespace Edlink.DEV_MEGA {
             dev.McuAppLoad(buff);
         }
 
+#if WINDOWS
         public override void Screen(string path) {
 
             byte[] vram = new byte[0x10000];
@@ -79,6 +80,7 @@ namespace Edlink.DEV_MEGA {
             mcmd.VramDump(vram, palette);
             MenuImage.MakeImage(path, vram, palette);
         }
+#endif
 
         public override string DevInf() {
 
