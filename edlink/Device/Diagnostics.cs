@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading;
+using System.Xml.Schema;
 
 namespace Edlink.Device {
     abstract class Diagnostics {
@@ -51,10 +52,32 @@ namespace Edlink.Device {
             byte[] rnd_dat = new byte[Math.Min(0x10000, size)];
             buff = new byte[rnd_dat.Length];
             rnd.NextBytes(rnd_dat);
-            dev.MemWR(addr, rnd_dat, 0, rnd_dat.Length); 
+            dev.MemWR(addr, rnd_dat, 0, rnd_dat.Length);
             dev.MemRD(addr, buff, 0, buff.Length);
             for (int i = 0; i < buff.Length; i++) {
                 if (buff[i] != rnd_dat[i]) return 0x04;
+            }
+
+            return 0;
+        }
+
+        protected int TestMEM_ext(string name, int addr, int size) {
+
+            int resp = TestMEM(name, addr, size);
+            if (resp != 0) {
+                return resp;
+            }
+
+            size = Math.Min(size, 0x1000000);
+
+            byte[] buff1 = new byte[size];
+            byte[] buff2 = new byte[size];
+            new Random((int)DateTime.Now.Ticks).NextBytes(buff1);
+
+            dev.MemWR(addr, buff1, 0, buff1.Length);
+            dev.MemRD(addr, buff2, 0, buff2.Length);
+            for (int i = 0; i < buff1.Length; i++) {
+                if (buff1[i] != buff2[i]) return 0x80;
             }
 
             return 0;
@@ -108,6 +131,22 @@ namespace Edlink.Device {
             Console.ForegroundColor = old;
 
             return ok ? 0 : 1;
+        }
+
+        protected int PrintVDC_pd(string name, UInt16 vdc, int ref_val, int max_dev) {
+
+
+            int ref_int = Tools.BcdToInt(ref_val);
+
+            int dev = (ref_int * max_dev + 50) / 100;
+
+            int min_int = ref_int - dev;
+            int max_int = ref_int + dev;
+
+            int min_val = Tools.IntToBcd(min_int);
+            int max_val = Tools.IntToBcd(max_int);
+
+            return PrintVDC(name, vdc, min_val, max_val);
         }
 
         protected void PrintResp(int resp) {

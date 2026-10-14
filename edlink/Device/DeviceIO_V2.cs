@@ -47,6 +47,7 @@ namespace Edlink.Device {
         const byte SYS_SCMD_GET_INF = 0x10;
         const byte SYS_SCMD_FPG_INIT = 0x12;
         const byte SYS_SCMD_BOOT_UPD = 0x14;
+        const byte SYS_SCMD_SKU = 0x16;
 
         const byte CMD_BOOT = 0xF0;
         const byte BOOT_SCMD_APP_MODE = 0x10;
@@ -251,6 +252,14 @@ namespace Edlink.Device {
             BootWait(2);
             CheckStatus();
         }
+
+        public override string Sku(string sku, string key) {
+
+            link.TxCMD(CMD_SYS, SYS_SCMD_SKU);
+            link.TxString(key);
+            link.TxString(sku);
+            return link.RxString();
+        }
         //************************************************************************************************ protected
         protected int[] GetSysInf(int[] request) {
 
@@ -278,6 +287,8 @@ namespace Edlink.Device {
                 throw new Exception("operation error: " + resp.ToString("X2") + "." + nresp.ToString("X2"));
             }
         }
+
+
         //************************************************************************************************ private
         int GetNresp(int resp) {
             link.TxCMD(CMD_NRESP);

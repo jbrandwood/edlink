@@ -304,7 +304,9 @@ namespace Edlink.Device {
             BootWait(tout_sec);
         }
 
-
+        public override string Sku(string sku, string key) {
+            throw new CmdException(CmdExceptionType.UnsupportedCmd);
+        }
         //************************************************************************************************ protected
         protected byte[] GetSysInf() {
 

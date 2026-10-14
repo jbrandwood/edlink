@@ -21,6 +21,7 @@ namespace Edlink {
         public const string ArgVal = "--val";
         public const string ArgCmd = "--cmd";// sub commands
         public const string ArgTout = "--tout";
+        public const string ArgKey = "--key";
 
 
         public const string CmdLink = ".link";
@@ -48,6 +49,7 @@ namespace Edlink {
         public const string CmdDscmd = "dscmd";//       device specific cmd
         public const string CmdNetGame = "netgate";
         public const string CmdExit = "exit";
+        public const string CmdSku = "setsku";
 
         //ArgMode
         public const string ModeApp = "app";

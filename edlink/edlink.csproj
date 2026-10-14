@@ -61,6 +61,7 @@
     <Compile Include="DEV_ED64\DeviceCmd.cs" />
     <Compile Include="Cli\CliHandlerCmd.cs" />
     <Compile Include="Device\DeviceCmdFacotoy.cs" />
+    <Compile Include="DEV_ED64\Diagnostics.cs" />
     <Compile Include="DEV_ED64\MenuCmd.cs" />
     <Compile Include="DEV_ED64\DeviceIO.cs" />
     <Compile Include="Device\Link.cs" />

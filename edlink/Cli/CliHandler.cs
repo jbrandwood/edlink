@@ -241,6 +241,10 @@ namespace Edlink {
                 case Cli.CmdHelp:
                     break;
 
+                case Cli.CmdSku:
+                    base.Sku(cmd);
+                    break;
+
                 default:
                     throw new CmdException(CmdExceptionType.UnknownCmd);
             }

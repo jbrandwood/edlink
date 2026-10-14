@@ -1,4 +1,5 @@
 ﻿
+using System;
 using static Edlink.Device.DeviceIO_V1;
 
 namespace Edlink.DEV_MEGA {

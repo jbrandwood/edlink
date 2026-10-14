@@ -52,8 +52,7 @@ namespace Edlink.Device {
         public abstract void RtcSet(DateTime dt);
         public abstract int RtcCal(DateTime dt, byte arg);
         public abstract void RtcCalSet(int ppm_val);
-
-
+        public abstract string Sku(string sku, string key);
 
         public void FifoWR(string str) {
 

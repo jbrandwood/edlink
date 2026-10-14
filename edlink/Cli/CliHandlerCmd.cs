@@ -500,6 +500,20 @@ namespace Edlink {
         protected void Exit(CmdLine cmd) {
             stdio_mode = false;
         }
+
+        protected void Sku(CmdLine cmd) {
+
+            CmdStart(cmd, "sku request...");
+
+            string sku = cmd.GetStr(Cli.ArgVal);
+            string key = cmd.GetStr(Cli.ArgKey);
+
+            sku = dcmd.Sku(sku, key);
+
+            CmdEnd("ok");
+
+            Tools.PrintLine(sku, inf_color);
+        }
         //************************************************************************************************ 
         void CopyFile(CmdLine cmd, string src, string dst) {
 

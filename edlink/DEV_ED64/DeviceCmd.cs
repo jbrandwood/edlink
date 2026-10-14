@@ -91,6 +91,12 @@ namespace Edlink.DEV_ED64 {
             return msg;
         }
 
+        public override void Diag() {
+
+            Diagnostics diag = new Diagnostics(dev);
+            diag.Start();
+        }
+
         public override void Dscmd(CmdLine cmd) {
 
             string scmd = cmd.GetStr(Cli.ArgCmd);

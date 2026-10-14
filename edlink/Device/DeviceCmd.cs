@@ -187,6 +187,11 @@ namespace Edlink.Device {
             ng.Start();
         }
 
+        public virtual string Sku(string sku, string key) {
+
+            return dev.Sku(sku, key);
+        }
+
         protected string AppDeploy(string rom_path, string fpga_path) {
 
             string usb_home;

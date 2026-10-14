@@ -11,10 +11,14 @@ namespace Edlink.DEV_ED64 {
         protected override int ADDR_FCI_FIFO => (ADDR_FCI_SYS + 0x10000);
 
         const int ADDR_FCI_SYS = 0x10000000;//system registers
+        internal const int ADDR_FCI_RAM0 = 0x0000000;
+        internal const int ADDR_FCI_RAM1 = 0x4000000;
 
         const byte CMD_DEV = 0x85;
         const byte DEV_SCMD_CIC_UPD = 0x25;
 
+        internal readonly int SIZE_RAM0 = 0x4000000;
+        internal readonly int SIZE_RAM1 = 0x4000000;
         public enum SysInf {
 
             //static vals

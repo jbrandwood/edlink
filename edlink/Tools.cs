@@ -4,8 +4,8 @@
 namespace Edlink {
     internal class Tools {
 
-        
-         public static string VdcToStr(int vdc) {
+
+        public static string VdcToStr(int vdc) {
 
 
             return (vdc >> 8).ToString("X2") + "." + (vdc & 0xff).ToString("X2");
@@ -82,6 +82,36 @@ namespace Edlink {
             Console.ForegroundColor = old_color;
         }
 
+        public static int BcdToInt(int bcd) {
+
+            int val = 0;
+            int mul = 1;
+
+            while (bcd != 0) {
+
+                val += (bcd & 0xF) * mul;
+                mul *= 10;
+                bcd >>= 4;
+            }
+
+            return val;
+        }
+
+        static public int IntToBcd(int val) {
+
+            int bcd = 0;
+            int shift = 0;
+
+            while (val != 0) {
+
+                bcd |= (val % 10) << shift;
+                val /= 10;
+                shift += 4;
+            }
+
+            return bcd;
+        }
+
         static UInt32 ByteToBcd(UInt32 val) {
 
             val &= 0xff;
@@ -91,6 +121,9 @@ namespace Edlink {
             }
             return (val / 10 << 4) | val % 10;
         }
+
+
+
 
     }
 
